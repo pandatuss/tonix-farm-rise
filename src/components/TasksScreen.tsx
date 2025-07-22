@@ -225,7 +225,7 @@ export default function TasksScreen({
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Daily Bonus</h3>
-                  <p className="text-sm text-muted-foreground">Claim every UTC+4</p>
+                  <p className="text-sm text-muted-foreground">Claim everyday UTC+4</p>
                 </div>
               </div>
               <div className="text-right">
