@@ -27,40 +27,51 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
     joinGroup: false,
   });
 
-  // Update timer every second and check for resets
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = new Date();
-      setCurrentTime(now);
-      
-      // Check if it's a new day (reset daily bonuses)
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
-      const timeUntilTomorrow = tomorrow.getTime() - now.getTime();
-      
-      if (timeUntilTomorrow <= 1000 && dailyClaimedToday) {
-        setDailyClaimedToday(false);
-      }
-      
-      // Check if it's a new week (reset weekly bonuses)
-      const nextMonday = new Date(now);
-      const daysUntilMonday = (1 + 7 - now.getUTCDay()) % 7;
-      if (daysUntilMonday === 0 && now.getUTCHours() === 0 && now.getUTCMinutes() === 0) {
-        nextMonday.setUTCDate(nextMonday.getUTCDate() + 7);
-      } else {
-        nextMonday.setUTCDate(nextMonday.getUTCDate() + daysUntilMonday);
-      }
-      nextMonday.setUTCHours(0, 0, 0, 0);
-      const timeUntilNextWeek = nextMonday.getTime() - now.getTime();
-      
-      if (timeUntilNextWeek <= 1000 && weeklyClaimedThisWeek) {
-        setWeeklyClaimedThisWeek(false);
-      }
-    }, 1000);
+  const timeUntilReset = () => {
+    const now = new Date();
+    // Convert to UTC+4 timezone
+    const utc4Now = new Date(now.getTime() + (4 * 60 * 60 * 1000));
+    const tomorrow = new Date(utc4Now);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    tomorrow.setUTCHours(0, 0, 0, 0);
+    
+    // Convert back to local time for calculation
+    const tomorrowLocal = new Date(tomorrow.getTime() - (4 * 60 * 60 * 1000));
+    const diff = tomorrowLocal.getTime() - now.getTime();
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
 
-    return () => clearInterval(interval);
-  }, [dailyClaimedToday, weeklyClaimedThisWeek]);
+  const timeUntilWeeklyReset = () => {
+    const now = new Date();
+    // Convert to UTC+4 timezone for weekly reset
+    const utc4Now = new Date(now.getTime() + (4 * 60 * 60 * 1000));
+    const nextMonday = new Date(utc4Now);
+    const daysUntilMonday = (1 + 7 - utc4Now.getUTCDay()) % 7;
+    if (daysUntilMonday === 0 && utc4Now.getUTCHours() === 0 && utc4Now.getUTCMinutes() === 0) {
+      nextMonday.setUTCDate(nextMonday.getUTCDate() + 7);
+    } else {
+      nextMonday.setUTCDate(nextMonday.getUTCDate() + daysUntilMonday);
+    }
+    nextMonday.setUTCHours(0, 0, 0, 0);
+    
+    // Convert back to local time for calculation
+    const nextMondayLocal = new Date(nextMonday.getTime() - (4 * 60 * 60 * 1000));
+    const diff = nextMondayLocal.getTime() - now.getTime();
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    if (days > 0) {
+      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
 
   const handleDailyClaim = () => {
     if (!dailyClaimedToday) {
@@ -76,40 +87,43 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
     }
   };
 
-  const timeUntilReset = () => {
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    const diff = tomorrow.getTime() - now.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    return `${hours}h ${minutes}m ${seconds}s`;
-  };
+  // Update timer every second and check for automatic resets based on UTC+4
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      setCurrentTime(now);
+      
+      // Check if it's time to reset daily bonus (UTC+4 timezone)
+      const utc4Now = new Date(now.getTime() + (4 * 60 * 60 * 1000));
+      const tomorrow = new Date(utc4Now);
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+      tomorrow.setUTCHours(0, 0, 0, 0);
+      const tomorrowLocal = new Date(tomorrow.getTime() - (4 * 60 * 60 * 1000));
+      const timeUntilTomorrow = tomorrowLocal.getTime() - now.getTime();
+      
+      if (timeUntilTomorrow <= 1000 && dailyClaimedToday) {
+        setDailyClaimedToday(false);
+      }
+      
+      // Check if it's time to reset weekly bonus (UTC+4 timezone)
+      const nextMonday = new Date(utc4Now);
+      const daysUntilMonday = (1 + 7 - utc4Now.getUTCDay()) % 7;
+      if (daysUntilMonday === 0 && utc4Now.getUTCHours() === 0 && utc4Now.getUTCMinutes() === 0) {
+        nextMonday.setUTCDate(nextMonday.getUTCDate() + 7);
+      } else {
+        nextMonday.setUTCDate(nextMonday.getUTCDate() + daysUntilMonday);
+      }
+      nextMonday.setUTCHours(0, 0, 0, 0);
+      const nextMondayLocal = new Date(nextMonday.getTime() - (4 * 60 * 60 * 1000));
+      const timeUntilNextWeek = nextMondayLocal.getTime() - now.getTime();
+      
+      if (timeUntilNextWeek <= 1000 && weeklyClaimedThisWeek) {
+        setWeeklyClaimedThisWeek(false);
+      }
+    }, 1000);
 
-  const timeUntilWeeklyReset = () => {
-    const now = new Date();
-    const nextMonday = new Date(now);
-    const daysUntilMonday = (1 + 7 - now.getUTCDay()) % 7;
-    if (daysUntilMonday === 0 && now.getUTCHours() === 0 && now.getUTCMinutes() === 0) {
-      nextMonday.setUTCDate(nextMonday.getUTCDate() + 7);
-    } else {
-      nextMonday.setUTCDate(nextMonday.getUTCDate() + daysUntilMonday);
-    }
-    nextMonday.setUTCHours(0, 0, 0, 0);
-    
-    const diff = nextMonday.getTime() - now.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
-    if (days > 0) {
-      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-    }
-    return `${hours}h ${minutes}m ${seconds}s`;
-  };
+    return () => clearInterval(interval);
+  }, [dailyClaimedToday, weeklyClaimedThisWeek]);
 
   const handleSpecialTask = (taskType: 'followX' | 'joinChannel' | 'joinGroup', url: string) => {
     if (!specialTasksOpened[taskType] && !specialTasksCompleted[taskType]) {
