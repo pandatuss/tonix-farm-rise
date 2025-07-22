@@ -9,8 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('farm');
-  const [tonixBalance, setTonixBalance] = useState(2500);
+  const [tonixBalance, setTonixBalance] = useState(2600);
   const [farmingRate, setFarmingRate] = useState(170.0);
+  const [dailyStreak, setDailyStreak] = useState(7);
+  const [todayEarnings, setTodayEarnings] = useState(32);
   const { toast } = useToast();
 
   const handleCollect = (amount: number) => {
@@ -46,6 +48,8 @@ const Index = () => {
 
   const handleCheckIn = () => {
     setTonixBalance(prev => prev + 50);
+    setDailyStreak(prev => prev + 1);
+    setTodayEarnings(prev => prev + 50);
     toast({
       title: "Check-in Successful!",
       description: "You received 50 TONIX streak bonus",
@@ -59,8 +63,11 @@ const Index = () => {
           <FarmingScreen
             tonixBalance={tonixBalance}
             farmingRate={farmingRate}
+            dailyStreak={dailyStreak}
+            todayEarnings={todayEarnings}
             onCollect={handleCollect}
             onBoost={handleBoost}
+            onCheckIn={handleCheckIn}
           />
         );
       case 'tasks':

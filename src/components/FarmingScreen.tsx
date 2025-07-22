@@ -8,123 +8,116 @@ import mascotHead from '@/assets/tonix-mascot-head.png';
 interface FarmingScreenProps {
   tonixBalance: number;
   farmingRate: number;
+  dailyStreak: number;
+  todayEarnings: number;
   onCollect: (amount: number) => void;
   onBoost: () => void;
+  onCheckIn: () => void;
 }
 
-export default function FarmingScreen({ tonixBalance, farmingRate, onCollect, onBoost }: FarmingScreenProps) {
-  const [accumulatedTonix, setAccumulatedTonix] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [todayEarnings, setTodayEarnings] = useState(250);
+export default function FarmingScreen({ tonixBalance, farmingRate, dailyStreak, todayEarnings, onCollect, onBoost, onCheckIn }: FarmingScreenProps) {
+  const [checkedInToday, setCheckedInToday] = useState(false);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const increment = farmingRate / 3600; // Per second rate
-      setAccumulatedTonix(prev => prev + increment);
-      setProgress(prev => (prev + 1) % 100);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [farmingRate]);
-
-  const handleCollect = () => {
-    if (accumulatedTonix > 0) {
-      onCollect(accumulatedTonix);
-      setAccumulatedTonix(0);
-      setProgress(0);
+  const handleCheckIn = () => {
+    if (!checkedInToday) {
+      onCheckIn();
+      setCheckedInToday(true);
     }
   };
 
+  const timeUntilReset = () => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const diff = tomorrow.getTime() - now.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
+
   return (
-    <div className="p-6 space-y-6">
-      {/* User Profile Section */}
-      <div className="tonix-card p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-2xl font-bold text-gradient">@username</h2>
-            <p className="text-muted-foreground">Level 5</p>
+    <div className="min-h-screen bg-background p-4 space-y-6">
+      {/* Header with Mascot */}
+      <div className="text-center pt-4">
+        <div className="w-20 h-20 mx-auto bg-gradient-primary rounded-full flex items-center justify-center tonix-glow p-3 mb-3">
+          <img src={mascotHead} alt="TONIX Mascot" className="w-full h-full object-contain" />
+        </div>
+        <h1 className="text-xl font-bold text-gradient">TONIX Farm</h1>
+        <p className="text-sm text-muted-foreground">@tonixuser</p>
+      </div>
+
+      {/* Balance Section */}
+      <div className="text-center space-y-2">
+        <p className="text-sm text-muted-foreground uppercase tracking-wide">YOUR BALANCE</p>
+        <p className="text-4xl font-bold text-gradient">{tonixBalance.toLocaleString()}</p>
+        <p className="text-lg text-muted-foreground">Points</p>
+        <p className="text-sm text-tonix-success">Today: +{todayEarnings}</p>
+      </div>
+
+      {/* Daily Streak Check-in */}
+      <Card className="tonix-card p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-sm">🔥</span>
+            </div>
+            <div>
+              <h3 className="font-semibold">Daily Streak Check-in</h3>
+              <p className="text-xs text-muted-foreground">Keep your streak alive!</p>
+            </div>
           </div>
           <div className="text-right">
-            <p className="text-sm text-muted-foreground">Connected Wallet</p>
-            <p className="font-mono text-xs text-tonix-primary">UQ...7Kj2</p>
+            <div className="bg-orange-500/20 text-orange-500 px-2 py-1 rounded text-xs font-bold">
+              {dailyStreak}
+            </div>
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-4 bg-tonix-surface rounded-lg">
-            <p className="text-3xl font-bold text-gradient">{tonixBalance.toLocaleString()}</p>
-            <p className="text-sm text-muted-foreground">Total TONIX</p>
-          </div>
-          <div className="text-center p-4 bg-tonix-surface rounded-lg">
-            <p className="text-lg font-semibold text-tonix-success">+{todayEarnings}</p>
-            <p className="text-sm text-muted-foreground">Today's Earnings</p>
-          </div>
+        <div className="mb-3">
+          <p className="text-xs text-muted-foreground mb-1">
+            🔥 Come back in {timeUntilReset()} for your next check-in
+          </p>
+          <p className="text-xs text-muted-foreground">
+            ⏰ Next check-in in:
+          </p>
+          <p className="font-bold text-orange-500">{timeUntilReset()}</p>
         </div>
-      </div>
-
-      {/* Farming Section */}
-      <div className="tonix-card p-8 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-glow opacity-50"></div>
-        <div className="relative z-10">
-          <div className="farming-pulse mb-6">
-            <div className="w-32 h-32 mx-auto bg-gradient-primary rounded-full flex items-center justify-center tonix-glow p-4">
-              <img src={mascotHead} alt="TONIX Mascot" className="w-full h-full object-contain" />
-            </div>
-          </div>
-          
-          <h3 className="text-2xl font-bold text-gradient mb-2">TONIX Farm</h3>
-          <p className="text-lg font-semibold text-tonix-primary mb-1">{farmingRate.toFixed(3)} TONIX/H</p>
-          <p className="text-sm text-muted-foreground mb-6">Current Farming Rate</p>
-          
-          <div className="mb-6">
-            <p className="text-lg font-semibold mb-2">
-              {accumulatedTonix.toFixed(3)} TONIX Ready
-            </p>
-            <Progress value={progress} className="h-3 mb-4" />
-          </div>
-          
-          <div className="space-y-3">
-            <Button 
-              onClick={handleCollect} 
-              className="w-full tonix-button bg-gradient-primary hover:opacity-90 text-primary-foreground font-bold text-lg py-4"
-              disabled={accumulatedTonix < 0.001}
-            >
-              <Coins className="w-5 h-5 mr-2" />
-              Collect TONIX
-            </Button>
-            
-            <Button 
-              onClick={onBoost}
-              variant="outline"
-              className="w-full tonix-button border-tonix-primary text-tonix-primary hover:bg-tonix-primary hover:text-primary-foreground"
-            >
-              <Zap className="w-5 h-5 mr-2" />
-              Boost Farming Rate
-            </Button>
-          </div>
-        </div>
-      </div>
+        
+        <Button
+          onClick={handleCheckIn}
+          disabled={checkedInToday}
+          className="w-full bg-tonix-primary hover:bg-tonix-primary/90 text-primary-foreground font-semibold disabled:opacity-50"
+        >
+          {checkedInToday ? '✓ Streak Maintained' : 'Check In'}
+        </Button>
+      </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="p-4 bg-tonix-surface border-tonix-primary/20">
-          <div className="flex items-center space-x-2">
-            <TrendingUp className="w-5 h-5 text-tonix-success" />
-            <div>
-              <p className="text-sm text-muted-foreground">Daily Streak</p>
-              <p className="font-bold text-tonix-success">7 days</p>
-            </div>
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="p-4 bg-tonix-surface text-center">
+          <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+            <span className="text-blue-500 text-sm">🏠</span>
           </div>
+          <p className="text-xs text-muted-foreground mb-1">LEVEL</p>
+          <p className="font-bold">5</p>
         </Card>
         
-        <Card className="p-4 bg-tonix-surface border-tonix-primary/20">
-          <div className="flex items-center space-x-2">
-            <Coins className="w-5 h-5 text-tonix-warning" />
-            <div>
-              <p className="text-sm text-muted-foreground">Rank</p>
-              <p className="font-bold text-tonix-warning">#1,247</p>
-            </div>
+        <Card className="p-4 bg-tonix-surface text-center">
+          <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+            <span className="text-green-500 text-sm">📅</span>
           </div>
+          <p className="text-xs text-muted-foreground mb-1">DAY</p>
+          <p className="font-bold">{dailyStreak}</p>
+        </Card>
+        
+        <Card className="p-4 bg-tonix-surface text-center">
+          <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+            <span className="text-purple-500 text-sm">💎</span>
+          </div>
+          <p className="text-xs text-muted-foreground mb-1">TOTAL</p>
+          <p className="font-bold">{tonixBalance.toLocaleString()}</p>
         </Card>
       </div>
     </div>
