@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,6 +14,7 @@ interface TasksScreenProps {
 export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, onClaimSpecialTask }: TasksScreenProps) {
   const [dailyClaimedToday, setDailyClaimedToday] = useState(false);
   const [weeklyClaimedThisWeek, setWeeklyClaimedThisWeek] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [specialTasksCompleted, setSpecialTasksCompleted] = useState({
     followX: false,
     joinChannel: false,
@@ -25,6 +26,41 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
     joinChannel: false,
     joinGroup: false,
   });
+
+  // Update timer every second and check for resets
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      setCurrentTime(now);
+      
+      // Check if it's a new day (reset daily bonuses)
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      const timeUntilTomorrow = tomorrow.getTime() - now.getTime();
+      
+      if (timeUntilTomorrow <= 1000 && dailyClaimedToday) {
+        setDailyClaimedToday(false);
+      }
+      
+      // Check if it's a new week (reset weekly bonuses)
+      const nextMonday = new Date(now);
+      const daysUntilMonday = (1 + 7 - now.getUTCDay()) % 7;
+      if (daysUntilMonday === 0 && now.getUTCHours() === 0 && now.getUTCMinutes() === 0) {
+        nextMonday.setUTCDate(nextMonday.getUTCDate() + 7);
+      } else {
+        nextMonday.setUTCDate(nextMonday.getUTCDate() + daysUntilMonday);
+      }
+      nextMonday.setUTCHours(0, 0, 0, 0);
+      const timeUntilNextWeek = nextMonday.getTime() - now.getTime();
+      
+      if (timeUntilNextWeek <= 1000 && weeklyClaimedThisWeek) {
+        setWeeklyClaimedThisWeek(false);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [dailyClaimedToday, weeklyClaimedThisWeek]);
 
   const handleDailyClaim = () => {
     if (!dailyClaimedToday) {
@@ -129,25 +165,25 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
               </div>
             </div>
             
-            {!dailyClaimedToday ? (
-              <div className="p-4 bg-muted/20 border-t border-border">
-                <div className="text-center mb-3">
-                  <Clock className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
-                  <div className="text-sm text-muted-foreground">Next claim in:</div>
-                  <div className="text-lg font-mono text-blue-400">{timeUntilReset()}</div>
+            <div className="p-4 bg-muted/20 border-t border-border">
+              <div className="text-center mb-3">
+                <Clock className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+                <div className="text-sm text-muted-foreground">
+                  {dailyClaimedToday ? "Next claim in:" : "Available now"}
                 </div>
-                <Button 
-                  onClick={handleDailyClaim}
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white"
-                >
-                  Claim Daily Bonus
-                </Button>
+                <div className="text-lg font-mono text-blue-400">{timeUntilReset()}</div>
               </div>
-            ) : (
-              <div className="p-4 bg-muted/20 border-t border-border text-center">
-                <div className="text-muted-foreground">Daily Bonus Claimed</div>
-              </div>
-            )}
+              <Button 
+                onClick={handleDailyClaim}
+                disabled={dailyClaimedToday}
+                className={dailyClaimedToday 
+                  ? "w-full bg-gray-500 text-white cursor-not-allowed" 
+                  : "w-full bg-blue-500 hover:bg-blue-600 text-white"
+                }
+              >
+                {dailyClaimedToday ? "Claimed - Wait for Reset" : "Claim Daily Bonus"}
+              </Button>
+            </div>
           </Card>
         </TabsContent>
 
@@ -169,30 +205,25 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
               </div>
             </div>
             
-            {!weeklyClaimedThisWeek ? (
-              <div className="p-4 bg-muted/20 border-t border-border">
-                <div className="text-center mb-3">
-                  <Clock className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
-                  <div className="text-sm text-muted-foreground">Next claim in:</div>
-                  <div className="text-lg font-mono text-purple-400">{timeUntilWeeklyReset()}</div>
+            <div className="p-4 bg-muted/20 border-t border-border">
+              <div className="text-center mb-3">
+                <Clock className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+                <div className="text-sm text-muted-foreground">
+                  {weeklyClaimedThisWeek ? "Next claim in:" : "Available now"}
                 </div>
-                <Button 
-                  onClick={handleWeeklyClaim}
-                  className="w-full bg-purple-500 hover:bg-purple-600 text-white"
-                >
-                  Claim Weekly Bonus
-                </Button>
+                <div className="text-lg font-mono text-purple-400">{timeUntilWeeklyReset()}</div>
               </div>
-            ) : (
-              <div className="p-4 bg-muted/20 border-t border-border">
-                <div className="text-center mb-3">
-                  <Clock className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
-                  <div className="text-sm text-muted-foreground">Next claim in:</div>
-                  <div className="text-lg font-mono text-purple-400">{timeUntilWeeklyReset()}</div>
-                </div>
-                <div className="text-center text-muted-foreground">Weekly Bonus Claimed</div>
-              </div>
-            )}
+              <Button 
+                onClick={handleWeeklyClaim}
+                disabled={weeklyClaimedThisWeek}
+                className={weeklyClaimedThisWeek 
+                  ? "w-full bg-gray-500 text-white cursor-not-allowed" 
+                  : "w-full bg-purple-500 hover:bg-purple-600 text-white"
+                }
+              >
+                {weeklyClaimedThisWeek ? "Claimed - Wait for Reset" : "Claim Weekly Bonus"}
+              </Button>
+            </div>
           </Card>
         </TabsContent>
 
