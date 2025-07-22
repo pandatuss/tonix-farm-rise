@@ -1,30 +1,89 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trophy, Medal, Award, Crown } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useTelegram } from '@/hooks/useTelegram';
+import { useUser } from '@/hooks/useUser';
 
 interface LeaderboardEntry {
   rank: number;
   username: string;
-  tonix: number;
-  avatar?: string;
+  first_name: string;
+  totalTonix: number;
+  telegramId: number;
+  photoUrl?: string;
 }
-
-const mockLeaderboard: LeaderboardEntry[] = [
-  { rank: 1, username: "CryptoKing", tonix: 125000 },
-  { rank: 2, username: "TONMaster", tonix: 98500 },
-  { rank: 3, username: "FarmPro", tonix: 87200 },
-  { rank: 4, username: "CoinCollector", tonix: 76800 },
-  { rank: 5, username: "DigitalFarmer", tonix: 65400 },
-  { rank: 6, username: "BlockchainBoss", tonix: 58900 },
-  { rank: 7, username: "TONExplorer", tonix: 52100 },
-  { rank: 8, username: "CryptoMiner", tonix: 47300 },
-];
 
 export default function LeaderboardScreen() {
   const [activeTab, setActiveTab] = useState("all-time");
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+  const [userRank, setUserRank] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user: telegramUser } = useTelegram();
+  const { profile } = useUser();
+
+  // Fetch leaderboard data
+  useEffect(() => {
+    const fetchLeaderboardData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Get all profiles with their referral earnings
+        const { data: profiles, error } = await supabase
+          .from('profiles')
+          .select(`
+            *,
+            referrals_as_referrer:referrals!referrer_id(*)
+          `);
+
+        if (error) {
+          console.error('Error fetching leaderboard:', error);
+          return;
+        }
+
+        // Calculate total TONIX including referral earnings
+        const leaderboardEntries: LeaderboardEntry[] = profiles.map((profile: any) => {
+          const referralCount = profile.referrals_as_referrer?.length || 0;
+          const referralEarnings = referralCount * 5; // 5 TONIX per referral
+          const totalTonix = (profile.tonix_balance || 0) + referralEarnings;
+
+          return {
+            rank: 0, // Will be set after sorting
+            username: profile.telegram_username || profile.first_name || 'Anonymous',
+            first_name: profile.first_name || 'Anonymous',
+            totalTonix,
+            telegramId: profile.telegram_id,
+            photoUrl: undefined // Will be populated if we can get it from Telegram
+          };
+        });
+
+        // Sort by total TONIX and assign ranks
+        leaderboardEntries.sort((a, b) => b.totalTonix - a.totalTonix);
+        leaderboardEntries.forEach((entry, index) => {
+          entry.rank = index + 1;
+        });
+
+        // Find current user's rank
+        if (telegramUser?.id) {
+          const userEntry = leaderboardEntries.find(entry => entry.telegramId === telegramUser.id);
+          if (userEntry) {
+            setUserRank(userEntry.rank);
+          }
+        }
+
+        setLeaderboardData(leaderboardEntries.slice(0, 50)); // Top 50 users
+      } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLeaderboardData();
+  }, [telegramUser?.id]);
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -69,85 +128,147 @@ export default function LeaderboardScreen() {
         </TabsList>
 
         <TabsContent value="all-time" className="space-y-4 mt-6">
-          {/* Top 3 Podium */}
-          <Card className="tonix-card p-6 mb-6">
-            <div className="flex items-end justify-center space-x-4 mb-6">
-              {/* 2nd Place */}
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full flex items-center justify-center mb-2 mx-auto">
-                  <Medal className="w-8 h-8 text-white" />
-                </div>
-                <p className="font-semibold text-sm">{mockLeaderboard[1].username}</p>
-                <p className="text-xs text-muted-foreground">{mockLeaderboard[1].tonix.toLocaleString()} TONIX</p>
-                <div className="h-16 bg-gray-400/20 rounded-t-lg mt-2 flex items-end justify-center">
-                  <span className="text-lg font-bold text-gray-400 mb-2">2</span>
-                </div>
-              </div>
+          {isLoading ? (
+            <Card className="tonix-card p-6 text-center">
+              <p className="text-muted-foreground">Loading leaderboard...</p>
+            </Card>
+          ) : leaderboardData.length === 0 ? (
+            <Card className="tonix-card p-6 text-center">
+              <p className="text-muted-foreground">No leaderboard data available</p>
+            </Card>
+          ) : (
+            <>
+              {/* Top 3 Podium */}
+              {leaderboardData.length >= 3 && (
+                <Card className="tonix-card p-6 mb-6">
+                  <div className="flex items-end justify-center space-x-4 mb-6">
+                    {/* 2nd Place */}
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full flex items-center justify-center mb-2 mx-auto overflow-hidden">
+                        {leaderboardData[1].photoUrl ? (
+                          <img 
+                            src={leaderboardData[1].photoUrl} 
+                            alt={leaderboardData[1].first_name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Medal className="w-8 h-8 text-white" />
+                        )}
+                      </div>
+                      <p className="font-semibold text-sm">{leaderboardData[1].username}</p>
+                      <p className="text-xs text-muted-foreground">{leaderboardData[1].totalTonix.toLocaleString()} TONIX</p>
+                      <div className="h-16 bg-gray-400/20 rounded-t-lg mt-2 flex items-end justify-center">
+                        <span className="text-lg font-bold text-gray-400 mb-2">2</span>
+                      </div>
+                    </div>
 
-              {/* 1st Place */}
-              <div className="text-center">
-                <div className="w-20 h-20 bg-gradient-primary rounded-full flex items-center justify-center mb-2 mx-auto tonix-glow">
-                  <Crown className="w-10 h-10 text-primary-foreground" />
-                </div>
-                <p className="font-bold">{mockLeaderboard[0].username}</p>
-                <p className="text-sm text-tonix-primary font-semibold">{mockLeaderboard[0].tonix.toLocaleString()} TONIX</p>
-                <div className="h-20 bg-gradient-primary rounded-t-lg mt-2 flex items-end justify-center">
-                  <span className="text-xl font-bold text-primary-foreground mb-2">1</span>
-                </div>
-              </div>
+                    {/* 1st Place */}
+                    <div className="text-center">
+                      <div className="w-20 h-20 bg-gradient-primary rounded-full flex items-center justify-center mb-2 mx-auto tonix-glow overflow-hidden">
+                        {leaderboardData[0].photoUrl ? (
+                          <img 
+                            src={leaderboardData[0].photoUrl} 
+                            alt={leaderboardData[0].first_name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Crown className="w-10 h-10 text-primary-foreground" />
+                        )}
+                      </div>
+                      <p className="font-bold">{leaderboardData[0].username}</p>
+                      <p className="text-sm text-tonix-primary font-semibold">{leaderboardData[0].totalTonix.toLocaleString()} TONIX</p>
+                      <div className="h-20 bg-gradient-primary rounded-t-lg mt-2 flex items-end justify-center">
+                        <span className="text-xl font-bold text-primary-foreground mb-2">1</span>
+                      </div>
+                    </div>
 
-              {/* 3rd Place */}
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center mb-2 mx-auto">
-                  <Award className="w-8 h-8 text-white" />
-                </div>
-                <p className="font-semibold text-sm">{mockLeaderboard[2].username}</p>
-                <p className="text-xs text-muted-foreground">{mockLeaderboard[2].tonix.toLocaleString()} TONIX</p>
-                <div className="h-12 bg-amber-600/20 rounded-t-lg mt-2 flex items-end justify-center">
-                  <span className="text-lg font-bold text-amber-600 mb-2">3</span>
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* Full Rankings */}
-          <div className="space-y-3">
-            {mockLeaderboard.map((entry) => (
-              <Card key={entry.rank} className={`p-4 ${entry.rank <= 3 ? 'tonix-card border-2' : 'bg-tonix-surface'} ${entry.rank === 1 ? 'border-yellow-500/50' : entry.rank === 2 ? 'border-gray-400/50' : entry.rank === 3 ? 'border-amber-600/50' : ''}`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <Badge className={`w-8 h-8 rounded-full flex items-center justify-center p-0 ${getRankBadge(entry.rank)}`}>
-                      {getRankIcon(entry.rank)}
-                    </Badge>
-                    <div>
-                      <p className="font-semibold">{entry.username}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {entry.tonix.toLocaleString()} TONIX
-                      </p>
+                    {/* 3rd Place */}
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center mb-2 mx-auto overflow-hidden">
+                        {leaderboardData[2].photoUrl ? (
+                          <img 
+                            src={leaderboardData[2].photoUrl} 
+                            alt={leaderboardData[2].first_name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Award className="w-8 h-8 text-white" />
+                        )}
+                      </div>
+                      <p className="font-semibold text-sm">{leaderboardData[2].username}</p>
+                      <p className="text-xs text-muted-foreground">{leaderboardData[2].totalTonix.toLocaleString()} TONIX</p>
+                      <div className="h-12 bg-amber-600/20 rounded-t-lg mt-2 flex items-end justify-center">
+                        <span className="text-lg font-bold text-amber-600 mb-2">3</span>
+                      </div>
                     </div>
                   </div>
-                  {entry.rank <= 3 && (
-                    <Trophy className="w-5 h-5 text-tonix-primary" />
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              )}
+
+              {/* Full Rankings */}
+              <div className="space-y-3">
+                {leaderboardData.map((entry) => (
+                  <Card key={entry.rank} className={`p-4 ${entry.rank <= 3 ? 'tonix-card border-2' : 'bg-tonix-surface'} ${entry.rank === 1 ? 'border-yellow-500/50' : entry.rank === 2 ? 'border-gray-400/50' : entry.rank === 3 ? 'border-amber-600/50' : ''}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <Badge className={`w-8 h-8 rounded-full flex items-center justify-center p-0 ${getRankBadge(entry.rank)}`}>
+                          {getRankIcon(entry.rank)}
+                        </Badge>
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-tonix-surface flex items-center justify-center">
+                          {entry.photoUrl ? (
+                            <img 
+                              src={entry.photoUrl} 
+                              alt={entry.first_name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-sm font-bold">{entry.first_name.charAt(0)}</span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-semibold">{entry.username}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {entry.totalTonix.toLocaleString()} TONIX
+                          </p>
+                        </div>
+                      </div>
+                      {entry.rank <= 3 && (
+                        <Trophy className="w-5 h-5 text-tonix-primary" />
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </>
+          )}
 
           {/* User's Position */}
-          <Card className="tonix-card p-4 border-tonix-primary">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Badge className="w-8 h-8 rounded-full flex items-center justify-center p-0 bg-tonix-primary/20 text-tonix-primary">
-                  1247
-                </Badge>
-                <div>
-                  <p className="font-semibold text-tonix-primary">You (@username)</p>
-                  <p className="text-sm text-muted-foreground">2,500 TONIX</p>
+          {telegramUser && profile && (
+            <Card className="tonix-card p-4 border-tonix-primary">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <Badge className="w-8 h-8 rounded-full flex items-center justify-center p-0 bg-tonix-primary/20 text-tonix-primary">
+                    {userRank || '?'}
+                  </Badge>
+                  <div className="w-10 h-10 rounded-full overflow-hidden bg-tonix-surface flex items-center justify-center">
+                    {telegramUser.photo_url ? (
+                      <img 
+                        src={telegramUser.photo_url} 
+                        alt={telegramUser.first_name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-sm font-bold">{telegramUser.first_name?.charAt(0)}</span>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-tonix-primary">You (@{telegramUser.username || telegramUser.first_name})</p>
+                    <p className="text-sm text-muted-foreground">{profile.tonix_balance.toLocaleString()} TONIX</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="this-week" className="space-y-4 mt-6">
