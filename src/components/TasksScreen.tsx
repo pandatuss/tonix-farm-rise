@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Gift, Clock, Calendar, ExternalLink, Twitter, Users, Check } from 'lucide-react';
+import { useUser } from '@/hooks/useUser';
 
 interface TasksScreenProps {
   onClaimDaily: () => void;
@@ -12,22 +13,55 @@ interface TasksScreenProps {
 }
 
 export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, onClaimSpecialTask }: TasksScreenProps) {
+  const { taskCompletions, completeTask } = useUser();
   const [dailyClaimedToday, setDailyClaimedToday] = useState(false);
   const [weeklyClaimedThisWeek, setWeeklyClaimedThisWeek] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showDailyTimer, setShowDailyTimer] = useState(false);
   const [showWeeklyTimer, setShowWeeklyTimer] = useState(false);
-  const [specialTasksCompleted, setSpecialTasksCompleted] = useState({
-    followX: false,
-    joinChannel: false,
-    joinGroup: false,
-  });
-  
   const [specialTasksOpened, setSpecialTasksOpened] = useState({
     followX: false,
     joinChannel: false,
     joinGroup: false,
   });
+
+  // Check if tasks are completed from database
+  const isTaskCompleted = (taskType: string, taskId: string) => {
+    return taskCompletions.some(completion => 
+      completion.task_type === taskType && completion.task_id === taskId
+    );
+  };
+
+  // Helper functions to check specific task completions
+  const isDailyBonusCompletedToday = () => {
+    const today = new Date().toISOString().split('T')[0];
+    return taskCompletions.some(completion => 
+      completion.task_type === 'daily' && 
+      completion.task_id === 'daily_bonus' &&
+      completion.completed_at.startsWith(today)
+    );
+  };
+
+  const isWeeklyBonusCompletedThisWeek = () => {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    
+    return taskCompletions.some(completion => 
+      completion.task_type === 'weekly' && 
+      completion.task_id === 'weekly_bonus' &&
+      new Date(completion.completed_at) >= startOfWeek
+    );
+  };
+
+  // Update states based on database data
+  useEffect(() => {
+    setDailyClaimedToday(isDailyBonusCompletedToday());
+    setWeeklyClaimedThisWeek(isWeeklyBonusCompletedThisWeek());
+    setShowDailyTimer(isDailyBonusCompletedToday());
+    setShowWeeklyTimer(isWeeklyBonusCompletedThisWeek());
+  }, [taskCompletions]);
 
   const timeUntilReset = () => {
     const now = new Date();
@@ -75,19 +109,29 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
     return `${hours}h ${minutes}m ${seconds}s`;
   };
 
-  const handleDailyClaim = () => {
+  const handleDailyClaim = async () => {
     if (!dailyClaimedToday) {
-      onClaimDaily();
-      setDailyClaimedToday(true);
-      setShowDailyTimer(true);
+      try {
+        await completeTask('daily', 'daily_bonus', 5);
+        onClaimDaily();
+        setDailyClaimedToday(true);
+        setShowDailyTimer(true);
+      } catch (error) {
+        console.log("Daily bonus claim failed:", error);
+      }
     }
   };
 
-  const handleWeeklyClaim = () => {
+  const handleWeeklyClaim = async () => {
     if (!weeklyClaimedThisWeek) {
-      onClaimWeekly();
-      setWeeklyClaimedThisWeek(true);
-      setShowWeeklyTimer(true);
+      try {
+        await completeTask('weekly', 'weekly_bonus', 25);
+        onClaimWeekly();
+        setWeeklyClaimedThisWeek(true);
+        setShowWeeklyTimer(true);
+      } catch (error) {
+        console.log("Weekly bonus claim failed:", error);
+      }
     }
   };
 
@@ -131,21 +175,25 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
     return () => clearInterval(interval);
   }, [dailyClaimedToday, weeklyClaimedThisWeek]);
 
-  const handleSpecialTask = (taskType: 'followX' | 'joinChannel' | 'joinGroup', url: string) => {
-    if (!specialTasksOpened[taskType] && !specialTasksCompleted[taskType]) {
+  const handleSpecialTask = async (taskType: 'followX' | 'joinChannel' | 'joinGroup', url: string) => {
+    const taskId = taskType === 'followX' ? 'follow_x' : taskType === 'joinChannel' ? 'join_channel' : 'join_group';
+    const isCompleted = isTaskCompleted('special', taskId);
+    
+    if (!specialTasksOpened[taskType] && !isCompleted) {
       // First click: open link and change button to "Claim"
       window.open(url, '_blank');
       setSpecialTasksOpened(prev => ({
         ...prev,
         [taskType]: true
       }));
-    } else if (specialTasksOpened[taskType] && !specialTasksCompleted[taskType]) {
+    } else if (specialTasksOpened[taskType] && !isCompleted) {
       // Second click: claim reward and show checkmark
-      onClaimSpecialTask(5);
-      setSpecialTasksCompleted(prev => ({
-        ...prev,
-        [taskType]: true
-      }));
+      try {
+        await completeTask('special', taskId, 5);
+        onClaimSpecialTask(5);
+      } catch (error) {
+        console.log("Task completion failed:", error);
+      }
     }
   };
 
@@ -270,15 +318,15 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
                 <Button 
                   onClick={() => handleSpecialTask('followX', 'https://twitter.com/tonixglobal')}
                   className={
-                    specialTasksCompleted.followX 
+                    isTaskCompleted('special', 'follow_x')
                       ? "bg-green-500 text-white ml-4 cursor-default" 
                       : specialTasksOpened.followX 
                         ? "bg-orange-500 hover:bg-orange-600 text-white ml-4"
                         : "bg-blue-500 hover:bg-blue-600 text-white ml-4"
                   }
-                  disabled={specialTasksCompleted.followX}
+                  disabled={isTaskCompleted('special', 'follow_x')}
                 >
-                  {specialTasksCompleted.followX ? (
+                  {isTaskCompleted('special', 'follow_x') ? (
                     <Check className="w-4 h-4" />
                   ) : (
                     specialTasksOpened.followX ? 'Claim' : 'Open Link'
@@ -310,15 +358,15 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
                 <Button 
                   onClick={() => handleSpecialTask('joinChannel', 'https://t.me/tonixglobal')}
                   className={
-                    specialTasksCompleted.joinChannel 
+                    isTaskCompleted('special', 'join_channel')
                       ? "bg-green-500 text-white ml-4 cursor-default" 
                       : specialTasksOpened.joinChannel 
                         ? "bg-orange-500 hover:bg-orange-600 text-white ml-4"
                         : "bg-blue-500 hover:bg-blue-600 text-white ml-4"
                   }
-                  disabled={specialTasksCompleted.joinChannel}
+                  disabled={isTaskCompleted('special', 'join_channel')}
                 >
-                  {specialTasksCompleted.joinChannel ? (
+                  {isTaskCompleted('special', 'join_channel') ? (
                     <Check className="w-4 h-4" />
                   ) : (
                     specialTasksOpened.joinChannel ? 'Claim' : 'Open Link'
@@ -350,15 +398,15 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
                 <Button 
                   onClick={() => handleSpecialTask('joinGroup', 'https://t.me/tonixglobal_chat')}
                   className={
-                    specialTasksCompleted.joinGroup 
+                    isTaskCompleted('special', 'join_group')
                       ? "bg-green-500 text-white ml-4 cursor-default" 
                       : specialTasksOpened.joinGroup 
                         ? "bg-orange-500 hover:bg-orange-600 text-white ml-4"
                         : "bg-blue-500 hover:bg-blue-600 text-white ml-4"
                   }
-                  disabled={specialTasksCompleted.joinGroup}
+                  disabled={isTaskCompleted('special', 'join_group')}
                 >
-                  {specialTasksCompleted.joinGroup ? (
+                  {isTaskCompleted('special', 'join_group') ? (
                     <Check className="w-4 h-4" />
                   ) : (
                     specialTasksOpened.joinGroup ? 'Claim' : 'Open Link'
