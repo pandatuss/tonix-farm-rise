@@ -108,7 +108,7 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn }: 
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xl font-bold text-blue-400">500</div>
+                <div className="text-xl font-bold text-blue-400">5</div>
                 <div className="text-sm text-muted-foreground">POINTS</div>
               </div>
             </div>

@@ -44,10 +44,10 @@ const Index = () => {
 
   const handleClaimDaily = async () => {
     try {
-      await completeTask('daily', 'daily_bonus', 100);
+      await completeTask('daily', 'daily_bonus', 5);
       toast({
         title: "Daily Bonus Claimed!",
-        description: "You received 100 TONIX",
+        description: "You received 5 TONIX",
       });
     } catch (error) {
       toast({
