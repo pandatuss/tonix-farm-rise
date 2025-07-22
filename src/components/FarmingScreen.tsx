@@ -30,6 +30,8 @@ export default function FarmingScreen({
   const [showTimer, setShowTimer] = useState(false);
   const { user: telegramUser } = useTelegram();
   const { profile: userProfile, updateProfile } = useUser();
+  
+  // Force recompilation with comment
 
   // Calculate offline accumulation on component mount
   useEffect(() => {
