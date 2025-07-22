@@ -53,6 +53,19 @@ export default function FarmingScreen({
     }
   }, [userProfile, farmingRate]);
 
+  // Check if user has checked in today based on database
+  const hasCheckedInToday = () => {
+    if (!userProfile?.last_check_in) return false;
+    const today = new Date().toISOString().split('T')[0];
+    return userProfile.last_check_in === today;
+  };
+
+  // Update local state based on database
+  useEffect(() => {
+    setCheckedInToday(hasCheckedInToday());
+    setShowTimer(hasCheckedInToday());
+  }, [userProfile?.last_check_in]);
+
   // Continue real-time accumulation and save to database
   useEffect(() => {
     const interval = setInterval(() => {
@@ -87,14 +100,18 @@ export default function FarmingScreen({
       const timeUntilReset = tomorrowLocal.getTime() - now.getTime();
       
       // Reset when timer reaches zero (within 1 second tolerance)
-      if (timeUntilReset <= 1000 && checkedInToday) {
-        setCheckedInToday(false);
-        setShowTimer(false);
+      // This enables claiming when the timer ends
+      if (timeUntilReset <= 1000) {
+        const todayFromDb = hasCheckedInToday();
+        if (todayFromDb !== checkedInToday || showTimer) {
+          setCheckedInToday(false);
+          setShowTimer(false);
+        }
       }
     }, 1000);
 
     return () => clearInterval(checkResetTimer);
-  }, [checkedInToday]);
+  }, [checkedInToday, showTimer, userProfile?.last_check_in]);
   const handleCheckIn = () => {
     if (!checkedInToday) {
       onCheckIn();
