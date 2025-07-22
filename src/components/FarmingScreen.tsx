@@ -123,10 +123,14 @@ export default function FarmingScreen({ tonixBalance, farmingRate, dailyStreak, 
       </Card>
       <Card className="bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700 p-6 relative overflow-hidden">
         {/* Header with flame icon and streak count */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center shadow-lg">
-              <img src="/lovable-uploads/8657a57d-1f6d-4c60-9e97-e85c55e87b4d.png" alt="Fire" className="w-5 h-5" />
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center shadow-lg">
+              <img 
+                src="/lovable-uploads/8657a57d-1f6d-4c60-9e97-e85c55e87b4d.png" 
+                alt="Fire" 
+                className="w-6 h-6 object-contain" 
+              />
             </div>
             <div>
               <h3 className="text-white font-bold text-lg">Daily Streak Check-in</h3>
@@ -134,42 +138,38 @@ export default function FarmingScreen({ tonixBalance, farmingRate, dailyStreak, 
             </div>
           </div>
           <div className="text-right">
-            <div className="text-orange-400 text-xl font-bold">
+            <div className="text-orange-400 text-2xl font-bold">
               {dailyStreak}
             </div>
-            <p className="text-gray-400 text-xs">day streak</p>
+            <p className="text-gray-400 text-xs uppercase tracking-wide">day streak</p>
           </div>
         </div>
         
         {/* Countdown section */}
-        <div className="text-center mb-4 py-4">
-          <p className="text-pink-400 text-sm mb-2 flex items-center justify-center">
+        <div className="text-center mb-6 py-4 bg-black/20 rounded-lg">
+          <p className="text-pink-400 text-sm mb-3 flex items-center justify-center">
             <span className="mr-2">⏰</span>
             Come back in {timeUntilReset()} for your next check-in.
           </p>
           <div className="mt-3">
-            <p className="text-gray-400 text-sm mb-1">Next check-in in:</p>
-            <p className="text-orange-500 text-2xl font-bold">{timeUntilReset()}</p>
+            <p className="text-gray-400 text-xs mb-2 uppercase tracking-wide">Next check-in in:</p>
+            <p className="text-orange-500 text-xl font-mono font-bold">{timeUntilReset()}</p>
           </div>
         </div>
         
-        {/* Bottom status bar */}
-        <div className="bg-blue-600/80 -mx-6 -mb-6 px-6 py-3">
-          <div className="flex items-center justify-center text-blue-100">
-            <span className="mr-2">⭐</span>
-            <span className="font-semibold">
-              {checkedInToday ? 'Streak Maintained' : 'Ready to Check In'}
-            </span>
-          </div>
-        </div>
-        
-        {!checkedInToday && (
+        {/* Check-in button or status */}
+        {!checkedInToday ? (
           <Button
             onClick={handleCheckIn}
-            className="absolute top-4 right-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg"
           >
-            Check In
+            Check In Now
           </Button>
+        ) : (
+          <div className="w-full bg-green-600/20 border border-green-500/30 text-green-400 py-3 rounded-lg text-center font-semibold">
+            <span className="mr-2">✓</span>
+            Streak Maintained Today
+          </div>
         )}
       </Card>
 
