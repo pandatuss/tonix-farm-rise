@@ -41,11 +41,6 @@ const Index = () => {
     } catch (error) {
       console.log('Commission processing failed:', error);
     }
-    
-    toast({
-      title: "TONIX Collected!",
-      description: `You collected ${amount.toFixed(3)} TONIX`,
-    });
   };
 
   const handleBoost = () => {
