@@ -126,7 +126,7 @@ export default function FarmingScreen({ tonixBalance, farmingRate, dailyStreak, 
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center shadow-lg">
-              <span className="text-white text-lg">🔥</span>
+              <img src="/lovable-uploads/8657a57d-1f6d-4c60-9e97-e85c55e87b4d.png" alt="Fire" className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-white font-bold text-lg">Daily Streak Check-in</h3>
