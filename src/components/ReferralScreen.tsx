@@ -79,7 +79,7 @@ export default function ReferralScreen() {
         }
         
         // Create referral and award bonuses
-        await createReferral(referredTelegramId);
+        await createReferral(referredTelegramId.toString());
         
         // Award 5 TONIX bonus to the user
         const currentBalance = profile?.tonix_balance || 0;
