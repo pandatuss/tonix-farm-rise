@@ -50,7 +50,7 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn }: 
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 mt-24">
       <div className="text-center mb-6">
         <h1 className="text-3xl font-bold text-gradient mb-2">Daily Tasks</h1>
         <p className="text-muted-foreground">Complete tasks to earn bonus TONIX</p>

@@ -4,7 +4,7 @@ import { Package, Gift, ShoppingBag } from 'lucide-react';
 
 export default function InventoryScreen() {
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 mt-24">
       <div className="text-center mb-6">
         <h1 className="text-3xl font-bold text-gradient mb-2">Inventory</h1>
         <p className="text-muted-foreground">Manage your items and gifts</p>

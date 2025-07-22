@@ -61,7 +61,7 @@ export default function FarmingScreen({
     const seconds = Math.floor(diff % (1000 * 60) / 1000);
     return `${hours}h ${minutes}m ${seconds}s`;
   };
-  return <div className="min-h-screen bg-background p-4 space-y-6">
+  return <div className="min-h-screen bg-background p-4 space-y-6 mt-24">
       {/* Header with Mascot */}
       <div className="text-center pt-4">
         <div className="w-20 h-20 mx-auto bg-gradient-primary rounded-full flex items-center justify-center tonix-glow p-1 mb-3 overflow-hidden">
