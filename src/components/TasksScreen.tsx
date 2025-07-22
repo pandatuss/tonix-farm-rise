@@ -202,12 +202,12 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
       // Second click: claim reward and show success notification
       try {
         await completeTask('special', taskId, 5);
-        onClaimSpecialTask(5);
+        // Don't call onClaimSpecialTask to avoid duplicate toast
         
         toast({
           title: "Task Completed!",
           description: "+5 TONIX earned successfully",
-          className: "mt-4"
+          className: "mt-16"
         });
         
       } catch (error: any) {
