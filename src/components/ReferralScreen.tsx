@@ -84,7 +84,7 @@ export default function ReferralScreen() {
         toast({
           title: "🎉 Referral Success!",
           description: "You both received 5 TONIX bonus!",
-          className: "mt-24"
+          className: "mt-[96px]"
         });
         
         setReferralCode('');
