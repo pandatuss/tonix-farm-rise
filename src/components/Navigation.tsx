@@ -7,7 +7,7 @@ interface NavigationProps {
 }
 
 const navItems = [
-  { id: 'farm', label: 'Farm', icon: Home },
+  { id: 'farm', label: 'Home', icon: Home },
   { id: 'tasks', label: 'Tasks', icon: ListTodo },
   { id: 'leaderboard', label: 'Ranking', icon: Trophy },
   { id: 'inventory', label: 'Items', icon: Package },
