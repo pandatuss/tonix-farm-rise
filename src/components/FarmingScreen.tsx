@@ -81,11 +81,11 @@ export default function FarmingScreen({ tonixBalance, farmingRate, dailyStreak, 
       </div>
 
       {/* Balance Section */}
-      <div className="text-center space-y-2">
-        <p className="text-sm text-muted-foreground uppercase tracking-wide">YOUR BALANCE</p>
-        <p className="text-4xl font-bold text-gradient">{tonixBalance.toLocaleString()}</p>
-        <p className="text-lg text-muted-foreground">Points</p>
-        <p className="text-sm text-tonix-success">Today: +{todayEarnings}</p>
+      <div className="bg-gray-900 rounded-xl p-8 text-center space-y-3 border border-gray-800">
+        <p className="text-gray-400 text-sm uppercase tracking-widest font-medium">YOUR BALANCE</p>
+        <p className="text-5xl font-bold text-blue-400">{tonixBalance.toLocaleString()}</p>
+        <p className="text-gray-400 text-lg">Points</p>
+        <p className="text-green-400 text-sm font-medium">Today: +{todayEarnings}</p>
       </div>
 
       {/* Farming Section */}
