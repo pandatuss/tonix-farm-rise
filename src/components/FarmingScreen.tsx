@@ -121,41 +121,56 @@ export default function FarmingScreen({ tonixBalance, farmingRate, dailyStreak, 
           </Button>
         </div>
       </Card>
-      <Card className="tonix-card p-4">
-        <div className="flex items-center justify-between mb-3">
+      <Card className="bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700 p-6 relative overflow-hidden">
+        {/* Header with flame icon and streak count */}
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm">🔥</span>
+            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center shadow-lg">
+              <span className="text-white text-lg">🔥</span>
             </div>
             <div>
-              <h3 className="font-semibold">Daily Streak Check-in</h3>
-              <p className="text-xs text-muted-foreground">Keep your streak alive!</p>
+              <h3 className="text-white font-bold text-lg">Daily Streak Check-in</h3>
+              <p className="text-gray-400 text-sm">Keep your streak alive!</p>
             </div>
           </div>
           <div className="text-right">
-            <div className="bg-orange-500/20 text-orange-500 px-2 py-1 rounded text-xs font-bold">
+            <div className="text-orange-400 text-xl font-bold">
               {dailyStreak}
             </div>
+            <p className="text-gray-400 text-xs">day streak</p>
           </div>
         </div>
         
-        <div className="mb-3">
-          <p className="text-xs text-muted-foreground mb-1">
-            🔥 Come back in {timeUntilReset()} for your next check-in
+        {/* Countdown section */}
+        <div className="text-center mb-4 py-4">
+          <p className="text-pink-400 text-sm mb-2 flex items-center justify-center">
+            <span className="mr-2">⏰</span>
+            Come back in {timeUntilReset()} for your next check-in.
           </p>
-          <p className="text-xs text-muted-foreground">
-            ⏰ Next check-in in:
-          </p>
-          <p className="font-bold text-orange-500">{timeUntilReset()}</p>
+          <div className="mt-3">
+            <p className="text-gray-400 text-sm mb-1">Next check-in in:</p>
+            <p className="text-orange-500 text-2xl font-bold">{timeUntilReset()}</p>
+          </div>
         </div>
         
-        <Button
-          onClick={handleCheckIn}
-          disabled={checkedInToday}
-          className="w-full bg-tonix-primary hover:bg-tonix-primary/90 text-primary-foreground font-semibold disabled:opacity-50"
-        >
-          {checkedInToday ? '✓ Streak Maintained' : 'Check In'}
-        </Button>
+        {/* Bottom status bar */}
+        <div className="bg-blue-600/80 -mx-6 -mb-6 px-6 py-3">
+          <div className="flex items-center justify-center text-blue-100">
+            <span className="mr-2">⭐</span>
+            <span className="font-semibold">
+              {checkedInToday ? 'Streak Maintained' : 'Ready to Check In'}
+            </span>
+          </div>
+        </div>
+        
+        {!checkedInToday && (
+          <Button
+            onClick={handleCheckIn}
+            className="absolute top-4 right-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold"
+          >
+            Check In
+          </Button>
+        )}
       </Card>
 
       {/* Stats Cards */}
