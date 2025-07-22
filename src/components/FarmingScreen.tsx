@@ -36,7 +36,15 @@ export default function FarmingScreen({
   
   // Force recompilation with comment
 
-  // Get accumulated TONIX from server on component mount and periodically
+  // Get accumulated TONIX from database and keep it synced
+  useEffect(() => {
+    // Set from user profile first (immediate display)
+    if (userProfile?.ready_to_collect !== undefined) {
+      setAccumulatedTonix(userProfile.ready_to_collect);
+    }
+  }, [userProfile?.ready_to_collect]);
+
+  // Also fetch from server function for real-time updates
   useEffect(() => {
     const fetchAccumulation = async () => {
       if (!telegramUser?.id) return;
@@ -54,11 +62,13 @@ export default function FarmingScreen({
       }
     };
 
-    fetchAccumulation();
-    
-    // Refresh every 10 seconds to show live accumulation
-    const interval = setInterval(fetchAccumulation, 10000);
-    return () => clearInterval(interval);
+    if (telegramUser?.id) {
+      fetchAccumulation();
+      
+      // Refresh every 15 seconds to show live accumulation
+      const interval = setInterval(fetchAccumulation, 15000);
+      return () => clearInterval(interval);
+    }
   }, [telegramUser?.id]);
 
   // Check if user has checked in today based on database
