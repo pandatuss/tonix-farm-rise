@@ -32,7 +32,8 @@ export default function FarmingScreen({
   useEffect(() => {
     const interval = setInterval(() => {
       const increment = farmingRate / 3600; // Per second rate
-      setAccumulatedTonix(prev => prev + increment);
+      const maxCollectable = farmingRate * 2; // Maximum 2x farming rate
+      setAccumulatedTonix(prev => Math.min(prev + increment, maxCollectable));
       setProgress(prev => (prev + 1) % 100);
     }, 1000);
     return () => clearInterval(interval);
