@@ -99,11 +99,8 @@ const Index = () => {
         description: `You received ${points} TONIX`,
       });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to complete task",
-        variant: "destructive",
-      });
+      // Silently handle errors - don't show error message to user
+      console.log("Task completion failed:", error);
     }
   };
 
