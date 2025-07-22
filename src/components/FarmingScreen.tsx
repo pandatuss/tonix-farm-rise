@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Coins, Zap, TrendingUp } from 'lucide-react';
-import farmIcon from '@/assets/farm-icon.png';
+import mascotHead from '@/assets/tonix-mascot-head.png';
 
 interface FarmingScreenProps {
   tonixBalance: number;
@@ -68,7 +68,7 @@ export default function FarmingScreen({ tonixBalance, farmingRate, onCollect, on
         <div className="relative z-10">
           <div className="farming-pulse mb-6">
             <div className="w-32 h-32 mx-auto bg-gradient-primary rounded-full flex items-center justify-center tonix-glow p-4">
-              <img src={farmIcon} alt="TONIX Farm" className="w-full h-full object-contain" />
+              <img src={mascotHead} alt="TONIX Mascot" className="w-full h-full object-contain" />
             </div>
           </div>
           
