@@ -15,6 +15,8 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
   const [dailyClaimedToday, setDailyClaimedToday] = useState(false);
   const [weeklyClaimedThisWeek, setWeeklyClaimedThisWeek] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showDailyTimer, setShowDailyTimer] = useState(false);
+  const [showWeeklyTimer, setShowWeeklyTimer] = useState(false);
   const [specialTasksCompleted, setSpecialTasksCompleted] = useState({
     followX: false,
     joinChannel: false,
@@ -77,6 +79,7 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
     if (!dailyClaimedToday) {
       onClaimDaily();
       setDailyClaimedToday(true);
+      setShowDailyTimer(true);
     }
   };
 
@@ -84,6 +87,7 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
     if (!weeklyClaimedThisWeek) {
       onClaimWeekly();
       setWeeklyClaimedThisWeek(true);
+      setShowWeeklyTimer(true);
     }
   };
 
@@ -103,6 +107,7 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
       
       if (timeUntilTomorrow <= 1000 && dailyClaimedToday) {
         setDailyClaimedToday(false);
+        setShowDailyTimer(false);
       }
       
       // Check if it's time to reset weekly bonus (UTC+4 timezone)
@@ -119,6 +124,7 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
       
       if (timeUntilNextWeek <= 1000 && weeklyClaimedThisWeek) {
         setWeeklyClaimedThisWeek(false);
+        setShowWeeklyTimer(false);
       }
     }, 1000);
 
@@ -180,13 +186,13 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
             </div>
             
             <div className="p-4 bg-muted/20 border-t border-border">
-              <div className="text-center mb-3">
-                <Clock className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
-                <div className="text-sm text-muted-foreground">
-                  {dailyClaimedToday ? "Next claim in:" : "Available now"}
+              {showDailyTimer && (
+                <div className="text-center mb-3">
+                  <Clock className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+                  <div className="text-sm text-muted-foreground">Next claim in:</div>
+                  <div className="text-lg font-mono text-blue-400">{timeUntilReset()}</div>
                 </div>
-                <div className="text-lg font-mono text-blue-400">{timeUntilReset()}</div>
-              </div>
+              )}
               <Button 
                 onClick={handleDailyClaim}
                 disabled={dailyClaimedToday}
@@ -220,13 +226,13 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
             </div>
             
             <div className="p-4 bg-muted/20 border-t border-border">
-              <div className="text-center mb-3">
-                <Clock className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
-                <div className="text-sm text-muted-foreground">
-                  {weeklyClaimedThisWeek ? "Next claim in:" : "Available now"}
+              {showWeeklyTimer && (
+                <div className="text-center mb-3">
+                  <Clock className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+                  <div className="text-sm text-muted-foreground">Next claim in:</div>
+                  <div className="text-lg font-mono text-purple-400">{timeUntilWeeklyReset()}</div>
                 </div>
-                <div className="text-lg font-mono text-purple-400">{timeUntilWeeklyReset()}</div>
-              </div>
+              )}
               <Button 
                 onClick={handleWeeklyClaim}
                 disabled={weeklyClaimedThisWeek}
