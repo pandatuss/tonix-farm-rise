@@ -10,6 +10,7 @@ import { useUser } from '@/hooks/useUser';
 
 export default function ReferralScreen() {
   const [referralCode, setReferralCode] = useState('');
+  const [hasSubmittedReferral, setHasSubmittedReferral] = useState(false);
   const { toast } = useToast();
   const { user: telegramUser } = useTelegram();
   const { profile, referrals, createReferral, updateProfile } = useUser();
@@ -87,6 +88,7 @@ export default function ReferralScreen() {
         });
         
         setReferralCode('');
+        setHasSubmittedReferral(true);
       } catch (error) {
         toast({
           title: "Error",
@@ -158,35 +160,37 @@ export default function ReferralScreen() {
         </div>
       </Card>
 
-      {/* Enter Referral Code */}
-      <Card className="tonix-card p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <Users className="w-6 h-6 text-tonix-warning" />
-          <h3 className="text-xl font-bold">Enter Friend's Code</h3>
-        </div>
-        
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Enter a friend's referral code to get a one-time bonus for both of you!
-          </p>
-          
-          <div className="flex space-x-2">
-            <Input
-              placeholder="Enter referral code..."
-              value={referralCode}
-              onChange={(e) => setReferralCode(e.target.value)}
-              className="bg-tonix-surface border-tonix-primary/30 focus:border-tonix-primary"
-            />
-            <Button
-              onClick={handleSubmitCode}
-              disabled={!referralCode.trim()}
-              className="tonix-button bg-gradient-primary hover:opacity-90 disabled:opacity-50"
-            >
-              Submit
-            </Button>
+      {/* Enter Referral Code - Only show if user hasn't submitted a referral yet */}
+      {!hasSubmittedReferral && (
+        <Card className="tonix-card p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <Users className="w-6 h-6 text-tonix-warning" />
+            <h3 className="text-xl font-bold">Enter Friend's Code</h3>
           </div>
-        </div>
-      </Card>
+          
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Enter a friend's referral code to get a one-time bonus for both of you!
+            </p>
+            
+            <div className="flex space-x-2">
+              <Input
+                placeholder="Enter referral code..."
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value)}
+                className="bg-tonix-surface border-tonix-primary/30 focus:border-tonix-primary"
+              />
+              <Button
+                onClick={handleSubmitCode}
+                disabled={!referralCode.trim()}
+                className="tonix-button bg-gradient-primary hover:opacity-90 disabled:opacity-50"
+              >
+                Submit
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* How It Works */}
       <Card className="p-6 bg-tonix-surface border-dashed border-2 border-muted">
