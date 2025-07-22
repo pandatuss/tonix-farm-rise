@@ -67,7 +67,7 @@ export default function FarmingScreen({
         <div className="w-20 h-20 mx-auto bg-gradient-primary rounded-full flex items-center justify-center tonix-glow p-1 mb-3 overflow-hidden">
           {user?.photo_url ? <img src={user.photo_url} alt={`${user.first_name}'s Profile`} className="w-full h-full object-cover rounded-full" /> : <img src={mascotHead} alt="TONIX Mascot" className="w-full h-full object-contain p-2" />}
         </div>
-        <h1 className="text-xl font-bold text-gradient">TONIX Farm</h1>
+        <h1 className="text-xl font-bold text-gradient">{user?.first_name || 'TONIX Farm'}</h1>
         <p className="text-sm text-muted-foreground">
           @{user?.username || user?.first_name || 'tonixuser'}
         </p>
