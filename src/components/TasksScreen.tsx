@@ -45,6 +45,29 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn }: 
     return `${hours}h ${minutes}m ${seconds}s`;
   };
 
+  const timeUntilWeeklyReset = () => {
+    const now = new Date();
+    const nextMonday = new Date(now);
+    const daysUntilMonday = (1 + 7 - now.getUTCDay()) % 7;
+    if (daysUntilMonday === 0 && now.getUTCHours() === 0 && now.getUTCMinutes() === 0) {
+      nextMonday.setUTCDate(nextMonday.getUTCDate() + 7);
+    } else {
+      nextMonday.setUTCDate(nextMonday.getUTCDate() + daysUntilMonday);
+    }
+    nextMonday.setUTCHours(0, 0, 0, 0);
+    
+    const diff = nextMonday.getTime() - now.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    if (days > 0) {
+      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
+
   const handleSpecialTask = (taskType: 'followX' | 'joinChannel' | 'joinGroup', url: string) => {
     window.open(url, '_blank');
     // Mark as completed after opening the link
@@ -132,6 +155,11 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn }: 
             
             {!weeklyClaimedThisWeek ? (
               <div className="p-4 bg-muted/20 border-t border-border">
+                <div className="text-center mb-3">
+                  <Clock className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+                  <div className="text-sm text-muted-foreground">Next claim in:</div>
+                  <div className="text-lg font-mono text-purple-400">{timeUntilWeeklyReset()}</div>
+                </div>
                 <Button 
                   onClick={handleWeeklyClaim}
                   className="w-full bg-purple-500 hover:bg-purple-600 text-white"
@@ -140,8 +168,13 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn }: 
                 </Button>
               </div>
             ) : (
-              <div className="p-4 bg-muted/20 border-t border-border text-center">
-                <div className="text-muted-foreground">Weekly Bonus Claimed</div>
+              <div className="p-4 bg-muted/20 border-t border-border">
+                <div className="text-center mb-3">
+                  <Clock className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+                  <div className="text-sm text-muted-foreground">Next claim in:</div>
+                  <div className="text-lg font-mono text-purple-400">{timeUntilWeeklyReset()}</div>
+                </div>
+                <div className="text-center text-muted-foreground">Weekly Bonus Claimed</div>
               </div>
             )}
           </Card>
