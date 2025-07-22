@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trophy, Medal, Award, Crown } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+
 import { useTelegram } from '@/hooks/useTelegram';
 import { useUser } from '@/hooks/useUser';
 
@@ -25,56 +25,15 @@ export default function LeaderboardScreen() {
   const { user: telegramUser } = useTelegram();
   const { profile } = useUser();
 
-  // Fetch leaderboard data
+  // Fetch leaderboard data - placeholder for server-side implementation
   useEffect(() => {
     const fetchLeaderboardData = async () => {
       try {
         setIsLoading(true);
-
-        // Get all profiles with their referral earnings
-        const { data: profiles, error } = await supabase
-          .from('profiles')
-          .select(`
-            *,
-            referrals_as_referrer:referrals!referrer_id(*)
-          `);
-
-        if (error) {
-          console.error('Error fetching leaderboard:', error);
-          return;
-        }
-
-        // Calculate total TONIX including referral earnings
-        const leaderboardEntries: LeaderboardEntry[] = profiles.map((profile: any) => {
-          const referralCount = profile.referrals_as_referrer?.length || 0;
-          const referralEarnings = referralCount * 5; // 5 TONIX per referral
-          const totalTonix = (profile.tonix_balance || 0) + referralEarnings;
-
-          return {
-            rank: 0, // Will be set after sorting
-            username: profile.telegram_username || profile.first_name || 'Anonymous',
-            first_name: profile.first_name || 'Anonymous',
-            totalTonix,
-            telegramId: profile.telegram_id,
-            photoUrl: undefined // Will be populated if we can get it from Telegram
-          };
-        });
-
-        // Sort by total TONIX and assign ranks
-        leaderboardEntries.sort((a, b) => b.totalTonix - a.totalTonix);
-        leaderboardEntries.forEach((entry, index) => {
-          entry.rank = index + 1;
-        });
-
-        // Find current user's rank
-        if (telegramUser?.id) {
-          const userEntry = leaderboardEntries.find(entry => entry.telegramId === telegramUser.id);
-          if (userEntry) {
-            setUserRank(userEntry.rank);
-          }
-        }
-
-        setLeaderboardData(leaderboardEntries.slice(0, 50)); // Top 50 users
+        // TODO: Create leaderboard server function for better performance
+        // For now, showing placeholder data
+        setLeaderboardData([]);
+        setUserRank(null);
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
       } finally {

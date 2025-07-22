@@ -30,7 +30,7 @@ export default function FarmingScreen({
   const [progress, setProgress] = useState(0);
   const [showTimer, setShowTimer] = useState(false);
   const { user: telegramUser } = useTelegram();
-  const { profile: userProfile, updateProfile } = useUser();
+  const { profile: userProfile, collectTonix, dailyCheckin } = useUser();
   const { toast } = useToast();
   
   // Force recompilation with comment
@@ -68,7 +68,7 @@ export default function FarmingScreen({
     setShowTimer(hasCheckedInToday());
   }, [userProfile?.last_check_in]);
 
-  // Continue real-time accumulation and save to database
+  // Continue real-time accumulation display (visual only)
   useEffect(() => {
     const interval = setInterval(() => {
       const increment = farmingRate / 3600; // Per second rate
@@ -76,18 +76,12 @@ export default function FarmingScreen({
       
       setAccumulatedTonix(prev => {
         const newAmount = Math.min(prev + increment, maxCollectable);
-        
-        // Save to database every 30 seconds to avoid too many requests
-        if (Math.floor(Date.now() / 1000) % 30 === 0) {
-          updateProfile({ ready_to_collect: newAmount });
-        }
-        
         return newAmount;
       });
       setProgress(prev => (prev + 1) % 100);
     }, 1000);
     return () => clearInterval(interval);
-  }, [farmingRate, updateProfile]);
+  }, [farmingRate]);
 
   // Timer to reset check-in status based on UTC+4
   useEffect(() => {
@@ -114,32 +108,42 @@ export default function FarmingScreen({
 
     return () => clearInterval(checkResetTimer);
   }, [checkedInToday, showTimer, userProfile?.last_check_in]);
-  const handleCheckIn = () => {
+  const handleCheckIn = async () => {
     if (!checkedInToday) {
-      onCheckIn();
-      setCheckedInToday(true);
-      setShowTimer(true);
+      try {
+        await dailyCheckin();
+        onCheckIn();
+        setCheckedInToday(true);
+        setShowTimer(true);
+      } catch (error) {
+        console.error('Check-in failed:', error);
+      }
     }
   };
   const handleCollect = async () => {
     if (accumulatedTonix > 0) {
-      onCollect(accumulatedTonix);
-      
-      toast({
-        title: "🎉 TONIX Collected!",
-        description: `You successfully collected ${accumulatedTonix.toFixed(3)} TONIX!`,
-        className: "mt-24",
-        duration: 2000
-      });
-      
-      setAccumulatedTonix(0);
-      setProgress(0);
-      
-      // Update database with new collection time and reset ready_to_collect
-      await updateProfile({ 
-        ready_to_collect: 0,
-        last_collect: new Date().toISOString()
-      });
+      try {
+        const result = await collectTonix();
+        onCollect(result.collected);
+        
+        toast({
+          title: "🎉 TONIX Collected!",
+          description: `You successfully collected ${result.collected.toFixed(3)} TONIX!`,
+          className: "mt-24",
+          duration: 2000
+        });
+        
+        setAccumulatedTonix(0);
+        setProgress(0);
+      } catch (error) {
+        console.error('Collection failed:', error);
+        toast({
+          title: "Collection Failed",
+          description: "Please try again later",
+          className: "mt-24",
+          duration: 2000
+        });
+      }
     }
   };
 
