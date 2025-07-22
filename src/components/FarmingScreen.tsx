@@ -39,6 +39,28 @@ export default function FarmingScreen({
     }, 1000);
     return () => clearInterval(interval);
   }, [farmingRate]);
+
+  // Timer to reset check-in status based on UTC+4
+  useEffect(() => {
+    const checkResetTimer = setInterval(() => {
+      const now = new Date();
+      const utc4Now = new Date(now.getTime() + (4 * 60 * 60 * 1000));
+      const tomorrow = new Date(utc4Now);
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+      tomorrow.setUTCHours(0, 0, 0, 0);
+      
+      const tomorrowLocal = new Date(tomorrow.getTime() - (4 * 60 * 60 * 1000));
+      const timeUntilReset = tomorrowLocal.getTime() - now.getTime();
+      
+      // Reset when timer reaches zero (within 1 second tolerance)
+      if (timeUntilReset <= 1000 && checkedInToday) {
+        setCheckedInToday(false);
+        setShowTimer(false);
+      }
+    }, 1000);
+
+    return () => clearInterval(checkResetTimer);
+  }, [checkedInToday]);
   const handleCheckIn = () => {
     if (!checkedInToday) {
       onCheckIn();
