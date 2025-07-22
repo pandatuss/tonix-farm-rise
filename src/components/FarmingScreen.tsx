@@ -35,25 +35,12 @@ export default function FarmingScreen({
   
   // Force recompilation with comment
 
-  // Calculate offline accumulation on component mount
+  // Set accumulated TONIX from database (server handles offline calculation)
   useEffect(() => {
-    const calculateOfflineAccumulation = () => {
-      const now = new Date();
-      const lastCollect = userProfile?.last_collect ? new Date(userProfile.last_collect) : now;
-      const timeDiffHours = (now.getTime() - lastCollect.getTime()) / (1000 * 60 * 60);
-      const offlineAccumulation = Math.min(timeDiffHours * farmingRate, farmingRate * 2);
-      
-      // Start with existing ready_to_collect from database plus any offline accumulation
-      const totalAccumulated = (userProfile?.ready_to_collect || 0) + offlineAccumulation;
-      const maxCollectable = farmingRate * 2;
-      
-      setAccumulatedTonix(Math.min(totalAccumulated, maxCollectable));
-    };
-
-    if (userProfile) {
-      calculateOfflineAccumulation();
+    if (userProfile?.ready_to_collect !== undefined) {
+      setAccumulatedTonix(userProfile.ready_to_collect);
     }
-  }, [userProfile, farmingRate]);
+  }, [userProfile?.ready_to_collect]);
 
   // Check if user has checked in today based on database
   const hasCheckedInToday = () => {
