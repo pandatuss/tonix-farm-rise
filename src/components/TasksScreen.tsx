@@ -218,9 +218,12 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
                 </div>
                 <Button 
                   onClick={() => handleSpecialTask('followX', 'https://twitter.com/tonixglobal')}
-                  className={specialTasksCompleted.followX 
-                    ? "bg-green-500 text-white ml-4 cursor-default" 
-                    : "bg-blue-500 hover:bg-blue-600 text-white ml-4"
+                  className={
+                    specialTasksCompleted.followX 
+                      ? "bg-green-500 text-white ml-4 cursor-default" 
+                      : specialTasksOpened.followX 
+                        ? "bg-orange-500 hover:bg-orange-600 text-white ml-4"
+                        : "bg-blue-500 hover:bg-blue-600 text-white ml-4"
                   }
                   disabled={specialTasksCompleted.followX}
                 >
@@ -255,9 +258,12 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
                 </div>
                 <Button 
                   onClick={() => handleSpecialTask('joinChannel', 'https://t.me/tonixglobal')}
-                  className={specialTasksCompleted.joinChannel 
-                    ? "bg-green-500 text-white ml-4 cursor-default" 
-                    : "bg-blue-500 hover:bg-blue-600 text-white ml-4"
+                  className={
+                    specialTasksCompleted.joinChannel 
+                      ? "bg-green-500 text-white ml-4 cursor-default" 
+                      : specialTasksOpened.joinChannel 
+                        ? "bg-orange-500 hover:bg-orange-600 text-white ml-4"
+                        : "bg-blue-500 hover:bg-blue-600 text-white ml-4"
                   }
                   disabled={specialTasksCompleted.joinChannel}
                 >
@@ -292,9 +298,12 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
                 </div>
                 <Button 
                   onClick={() => handleSpecialTask('joinGroup', 'https://t.me/tonixglobal_chat')}
-                  className={specialTasksCompleted.joinGroup 
-                    ? "bg-green-500 text-white ml-4 cursor-default" 
-                    : "bg-blue-500 hover:bg-blue-600 text-white ml-4"
+                  className={
+                    specialTasksCompleted.joinGroup 
+                      ? "bg-green-500 text-white ml-4 cursor-default" 
+                      : specialTasksOpened.joinGroup 
+                        ? "bg-orange-500 hover:bg-orange-600 text-white ml-4"
+                        : "bg-blue-500 hover:bg-blue-600 text-white ml-4"
                   }
                   disabled={specialTasksCompleted.joinGroup}
                 >
