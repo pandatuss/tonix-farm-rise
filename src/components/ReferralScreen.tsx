@@ -58,7 +58,8 @@ export default function ReferralScreen() {
           toast({
             title: "Invalid Code",
             description: "Please enter a valid referral code",
-            variant: "destructive"
+            variant: "destructive",
+            className: "mt-[96px]"
           });
           return;
         }
@@ -67,7 +68,8 @@ export default function ReferralScreen() {
           toast({
             title: "Invalid Code",
             description: "You cannot refer yourself",
-            variant: "destructive"
+            variant: "destructive",
+            className: "mt-[96px]"
           });
           return;
         }
@@ -93,7 +95,8 @@ export default function ReferralScreen() {
         toast({
           title: "Error",
           description: "Failed to process referral code",
-          variant: "destructive"
+          variant: "destructive",
+          className: "mt-[96px]"
         });
       }
     }
