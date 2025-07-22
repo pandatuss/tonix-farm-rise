@@ -101,6 +101,7 @@ const Index = () => {
     toast({
       title: "Check-in Successful!",
       description: "Daily streak maintained!",
+      className: "mt-16",
       duration: 2000
     });
   };

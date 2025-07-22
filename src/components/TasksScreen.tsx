@@ -115,7 +115,7 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
     if (!dailyClaimedToday) {
       try {
         await completeTask('daily', 'daily_bonus', 5);
-        onClaimDaily();
+        // Don't call onClaimDaily to avoid toast
         setDailyClaimedToday(true);
         setShowDailyTimer(true);
       } catch (error: any) {
@@ -133,7 +133,7 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
     if (!weeklyClaimedThisWeek) {
       try {
         await completeTask('weekly', 'weekly_bonus', 25);
-        onClaimWeekly();
+        // Don't call onClaimWeekly to avoid toast
         setWeeklyClaimedThisWeek(true);
         setShowWeeklyTimer(true);
       } catch (error: any) {
@@ -207,7 +207,8 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
         toast({
           title: "Task Completed!",
           description: "+5 TONIX earned successfully",
-          className: "mt-16"
+          className: "mt-16",
+          duration: 2000
         });
         
       } catch (error: any) {
