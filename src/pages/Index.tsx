@@ -91,6 +91,22 @@ const Index = () => {
     });
   };
 
+  const handleClaimSpecialTask = async (points: number) => {
+    try {
+      await completeTask('special', 'special_task', points);
+      toast({
+        title: "Task Completed!",
+        description: `You received ${points} TONIX`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to complete task",
+        variant: "destructive",
+      });
+    }
+  };
+
   const renderScreen = () => {
     switch (activeTab) {
       case 'farm':
@@ -107,11 +123,12 @@ const Index = () => {
         );
       case 'tasks':
         return (
-          <TasksScreen
-            onClaimDaily={handleClaimDaily}
-            onClaimWeekly={handleClaimWeekly}
-            onCheckIn={handleCheckIn}
-          />
+        <TasksScreen 
+          onClaimDaily={handleClaimDaily} 
+          onClaimWeekly={handleClaimWeekly} 
+          onCheckIn={handleCheckIn} 
+          onClaimSpecialTask={handleClaimSpecialTask}
+        />
         );
       case 'leaderboard':
         return <LeaderboardScreen />;

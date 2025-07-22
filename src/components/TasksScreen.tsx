@@ -8,12 +8,19 @@ interface TasksScreenProps {
   onClaimDaily: () => void;
   onClaimWeekly: () => void;
   onCheckIn: () => void;
+  onClaimSpecialTask: (points: number) => void;
 }
 
-export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn }: TasksScreenProps) {
+export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, onClaimSpecialTask }: TasksScreenProps) {
   const [dailyClaimedToday, setDailyClaimedToday] = useState(false);
   const [weeklyClaimedThisWeek, setWeeklyClaimedThisWeek] = useState(false);
   const [specialTasksCompleted, setSpecialTasksCompleted] = useState({
+    followX: false,
+    joinChannel: false,
+    joinGroup: false,
+  });
+  
+  const [specialTasksOpened, setSpecialTasksOpened] = useState({
     followX: false,
     joinChannel: false,
     joinGroup: false,
@@ -69,12 +76,21 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn }: 
   };
 
   const handleSpecialTask = (taskType: 'followX' | 'joinChannel' | 'joinGroup', url: string) => {
-    window.open(url, '_blank');
-    // Mark as completed after opening the link
-    setSpecialTasksCompleted(prev => ({
-      ...prev,
-      [taskType]: true
-    }));
+    if (!specialTasksOpened[taskType]) {
+      // First click: open link and change button to "Claim"
+      window.open(url, '_blank');
+      setSpecialTasksOpened(prev => ({
+        ...prev,
+        [taskType]: true
+      }));
+    } else if (!specialTasksCompleted[taskType]) {
+      // Second click: claim reward
+      onClaimSpecialTask(5);
+      setSpecialTasksCompleted(prev => ({
+        ...prev,
+        [taskType]: true
+      }));
+    }
   };
 
   return (
@@ -196,17 +212,18 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn }: 
                     </p>
                     <div className="flex items-center gap-1 text-blue-400">
                       <Twitter className="w-4 h-4" />
-                      <span className="text-sm font-medium">+1,000 points</span>
+                      <span className="text-sm font-medium">+5 TONIX</span>
                     </div>
                   </div>
                 </div>
-                <Button 
-                  onClick={() => handleSpecialTask('followX', 'https://twitter.com/tonixglobal')}
-                  className="bg-blue-500 hover:bg-blue-600 text-white ml-4"
-                  disabled={specialTasksCompleted.followX}
-                >
-                  {specialTasksCompleted.followX ? 'Completed' : 'Open Link'}
-                </Button>
+                {!specialTasksCompleted.followX && (
+                  <Button 
+                    onClick={() => handleSpecialTask('followX', 'https://twitter.com/tonixglobal')}
+                    className="bg-blue-500 hover:bg-blue-600 text-white ml-4"
+                  >
+                    {specialTasksOpened.followX ? 'Claim' : 'Open Link'}
+                  </Button>
+                )}
               </div>
             </div>
           </Card>
@@ -226,17 +243,18 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn }: 
                     </p>
                     <div className="flex items-center gap-1 text-blue-400">
                       <Users className="w-4 h-4" />
-                      <span className="text-sm font-medium">+500 points</span>
+                      <span className="text-sm font-medium">+5 TONIX</span>
                     </div>
                   </div>
                 </div>
-                <Button 
-                  onClick={() => handleSpecialTask('joinChannel', 'https://t.me/tonixglobal')}
-                  className="bg-blue-500 hover:bg-blue-600 text-white ml-4"
-                  disabled={specialTasksCompleted.joinChannel}
-                >
-                  {specialTasksCompleted.joinChannel ? 'Completed' : 'Open Link'}
-                </Button>
+                {!specialTasksCompleted.joinChannel && (
+                  <Button 
+                    onClick={() => handleSpecialTask('joinChannel', 'https://t.me/tonixglobal')}
+                    className="bg-blue-500 hover:bg-blue-600 text-white ml-4"
+                  >
+                    {specialTasksOpened.joinChannel ? 'Claim' : 'Open Link'}
+                  </Button>
+                )}
               </div>
             </div>
           </Card>
@@ -256,17 +274,18 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn }: 
                     </p>
                     <div className="flex items-center gap-1 text-blue-400">
                       <Users className="w-4 h-4" />
-                      <span className="text-sm font-medium">+500 points</span>
+                      <span className="text-sm font-medium">+5 TONIX</span>
                     </div>
                   </div>
                 </div>
-                <Button 
-                  onClick={() => handleSpecialTask('joinGroup', 'https://t.me/tonixglobal_chat')}
-                  className="bg-blue-500 hover:bg-blue-600 text-white ml-4"
-                  disabled={specialTasksCompleted.joinGroup}
-                >
-                  {specialTasksCompleted.joinGroup ? 'Completed' : 'Open Link'}
-                </Button>
+                {!specialTasksCompleted.joinGroup && (
+                  <Button 
+                    onClick={() => handleSpecialTask('joinGroup', 'https://t.me/tonixglobal_chat')}
+                    className="bg-blue-500 hover:bg-blue-600 text-white ml-4"
+                  >
+                    {specialTasksOpened.joinGroup ? 'Claim' : 'Open Link'}
+                  </Button>
+                )}
               </div>
             </div>
           </Card>
