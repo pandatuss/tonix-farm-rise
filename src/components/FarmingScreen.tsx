@@ -6,6 +6,7 @@ import { Coins, Zap, TrendingUp, Flame } from 'lucide-react';
 import mascotHead from '@/assets/tonix-mascot-head.png';
 import { useTelegram } from '@/hooks/useTelegram';
 import { useUser } from '@/hooks/useUser';
+import { useToast } from '@/hooks/use-toast';
 interface FarmingScreenProps {
   tonixBalance: number;
   farmingRate: number;
@@ -30,6 +31,7 @@ export default function FarmingScreen({
   const [showTimer, setShowTimer] = useState(false);
   const { user: telegramUser } = useTelegram();
   const { profile: userProfile, updateProfile } = useUser();
+  const { toast } = useToast();
   
   // Force recompilation with comment
 
@@ -122,6 +124,13 @@ export default function FarmingScreen({
   const handleCollect = async () => {
     if (accumulatedTonix > 0) {
       onCollect(accumulatedTonix);
+      
+      toast({
+        title: "🎉 TONIX Collected!",
+        description: `You successfully collected ${accumulatedTonix.toFixed(3)} TONIX!`,
+        className: "mt-24"
+      });
+      
       setAccumulatedTonix(0);
       setProgress(0);
       
@@ -131,6 +140,16 @@ export default function FarmingScreen({
         last_collect: new Date().toISOString()
       });
     }
+  };
+
+  const handleBoost = () => {
+    onBoost();
+    
+    toast({
+      title: "⚡ Boost Feature",
+      description: "TON wallet integration coming soon for rate boosting!",
+      className: "mt-24"
+    });
   };
   const timeUntilReset = () => {
     const now = new Date();
@@ -188,7 +207,7 @@ export default function FarmingScreen({
             Collect TONIX
           </Button>
           
-          <Button onClick={onBoost} variant="outline" className="w-full tonix-button border-tonix-primary text-tonix-primary hover:bg-tonix-primary hover:text-primary-foreground">
+          <Button onClick={handleBoost} variant="outline" className="w-full tonix-button border-tonix-primary text-tonix-primary hover:bg-tonix-primary hover:text-primary-foreground">
             <Zap className="w-5 h-5 mr-2" />
             Boost Rate
           </Button>
