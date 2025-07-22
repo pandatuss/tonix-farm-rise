@@ -15,7 +15,7 @@ const Index = () => {
 
   // Fallback values when profile is loading
   const tonixBalance = profile?.tonix_balance || 0;
-  const farmingRate = profile?.farming_rate || 10.0;
+  const farmingRate = profile?.farming_rate || 1.0;
   const dailyStreak = profile?.daily_streak || 0;
   const todayEarnings = profile?.today_earnings || 0;
   const readyToCollect = profile?.ready_to_collect || 0;
