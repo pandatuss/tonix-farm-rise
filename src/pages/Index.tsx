@@ -47,12 +47,10 @@ const Index = () => {
   };
 
   const handleCheckIn = () => {
-    setTonixBalance(prev => prev + 50);
     setDailyStreak(prev => prev + 1);
-    setTodayEarnings(prev => prev + 50);
     toast({
       title: "Check-in Successful!",
-      description: "You received 50 TONIX streak bonus",
+      description: "Daily streak maintained!",
     });
   };
 

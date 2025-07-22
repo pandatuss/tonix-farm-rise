@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Coins, Zap, TrendingUp } from 'lucide-react';
+import { Coins, Zap, TrendingUp, Flame } from 'lucide-react';
 import mascotHead from '@/assets/tonix-mascot-head.png';
 import { useTelegram } from '@/hooks/useTelegram';
 interface FarmingScreenProps {
@@ -111,7 +111,7 @@ export default function FarmingScreen({
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
-              <img src="/lovable-uploads/8657a57d-1f6d-4c60-9e97-e85c55e87b4d.png" alt="Fire" className="w-6 h-6 object-contain" />
+              <Flame className="w-6 h-6 text-white" />
             </div>
             <div>
               <h3 className="text-white font-bold text-lg">Daily Streak Check-in</h3>
