@@ -27,22 +27,19 @@ export default function FarmingScreen({
   onCheckIn
 }: FarmingScreenProps) {
   const [checkedInToday, setCheckedInToday] = useState(false);
-  const [accumulatedTonix, setAccumulatedTonix] = useState(0);
   const [progress, setProgress] = useState(0);
   const [showTimer, setShowTimer] = useState(false);
   const { user: telegramUser } = useTelegram();
   const { profile: userProfile, collectTonix, dailyCheckin } = useUser();
   const { toast } = useToast();
+  const [accumulatedTonix, setAccumulatedTonix] = useState(0);
   
-  // Force recompilation with comment
-
-  // Get accumulated TONIX from database and keep it synced
+  // Initialize with database value immediately when available
   useEffect(() => {
-    // Set from user profile first (immediate display)
     if (userProfile?.ready_to_collect !== undefined) {
       setAccumulatedTonix(userProfile.ready_to_collect);
     }
-  }, [userProfile?.ready_to_collect]);
+  }, [userProfile]);
 
   // Also fetch from server function for real-time updates
   useEffect(() => {
