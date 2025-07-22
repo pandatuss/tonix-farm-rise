@@ -53,11 +53,12 @@ Deno.serve(async (req) => {
     const maxAccumulation = farmingRate * 2
     const calculatedAccumulation = Math.min(timeDiffHours * farmingRate, maxAccumulation)
     
-    // Update ready_to_collect in database
+    // Update ready_to_collect and last_collect in database
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ 
         ready_to_collect: calculatedAccumulation,
+        last_collect: now.toISOString(),
         updated_at: now.toISOString()
       })
       .eq('telegram_id', userId)

@@ -55,8 +55,10 @@ export default function FarmingScreen({
     setShowTimer(hasCheckedInToday());
   }, [userProfile?.last_check_in]);
 
-  // Continue real-time accumulation display (visual only)
+  // Continue real-time accumulation display from database value
   useEffect(() => {
+    if (userProfile?.ready_to_collect === undefined) return;
+    
     const interval = setInterval(() => {
       const increment = farmingRate / 3600; // Per second rate
       const maxCollectable = farmingRate * 2; // Maximum 2x farming rate
@@ -68,7 +70,7 @@ export default function FarmingScreen({
       setProgress(prev => (prev + 1) % 100);
     }, 1000);
     return () => clearInterval(interval);
-  }, [farmingRate]);
+  }, [farmingRate, userProfile?.ready_to_collect]);
 
   // Timer to reset check-in status based on UTC+4
   useEffect(() => {
