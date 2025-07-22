@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Coins, Zap, TrendingUp, Flame } from 'lucide-react';
 import mascotHead from '@/assets/tonix-mascot-head.png';
 import { useTelegram } from '@/hooks/useTelegram';
+import { useUser } from '@/hooks/useUser';
 interface FarmingScreenProps {
   tonixBalance: number;
   farmingRate: number;
@@ -27,18 +28,49 @@ export default function FarmingScreen({
   const [accumulatedTonix, setAccumulatedTonix] = useState(0);
   const [progress, setProgress] = useState(0);
   const [showTimer, setShowTimer] = useState(false);
-  const {
-    user
-  } = useTelegram();
+  const { user: telegramUser } = useTelegram();
+  const { profile: userProfile, updateProfile } = useUser();
+
+  // Calculate offline accumulation on component mount
+  useEffect(() => {
+    const calculateOfflineAccumulation = () => {
+      const now = new Date();
+      const lastCollect = userProfile?.last_collect ? new Date(userProfile.last_collect) : now;
+      const timeDiffHours = (now.getTime() - lastCollect.getTime()) / (1000 * 60 * 60);
+      const offlineAccumulation = Math.min(timeDiffHours * farmingRate, farmingRate * 2);
+      
+      // Start with existing ready_to_collect from database plus any offline accumulation
+      const totalAccumulated = (userProfile?.ready_to_collect || 0) + offlineAccumulation;
+      const maxCollectable = farmingRate * 2;
+      
+      setAccumulatedTonix(Math.min(totalAccumulated, maxCollectable));
+    };
+
+    if (userProfile) {
+      calculateOfflineAccumulation();
+    }
+  }, [userProfile, farmingRate]);
+
+  // Continue real-time accumulation and save to database
   useEffect(() => {
     const interval = setInterval(() => {
       const increment = farmingRate / 3600; // Per second rate
       const maxCollectable = farmingRate * 2; // Maximum 2x farming rate
-      setAccumulatedTonix(prev => Math.min(prev + increment, maxCollectable));
+      
+      setAccumulatedTonix(prev => {
+        const newAmount = Math.min(prev + increment, maxCollectable);
+        
+        // Save to database every 30 seconds to avoid too many requests
+        if (Math.floor(Date.now() / 1000) % 30 === 0) {
+          updateProfile({ ready_to_collect: newAmount });
+        }
+        
+        return newAmount;
+      });
       setProgress(prev => (prev + 1) % 100);
     }, 1000);
     return () => clearInterval(interval);
-  }, [farmingRate]);
+  }, [farmingRate, updateProfile]);
 
   // Timer to reset check-in status based on UTC+4
   useEffect(() => {
@@ -68,11 +100,17 @@ export default function FarmingScreen({
       setShowTimer(true);
     }
   };
-  const handleCollect = () => {
+  const handleCollect = async () => {
     if (accumulatedTonix > 0) {
       onCollect(accumulatedTonix);
       setAccumulatedTonix(0);
       setProgress(0);
+      
+      // Update database with new collection time and reset ready_to_collect
+      await updateProfile({ 
+        ready_to_collect: 0,
+        last_collect: new Date().toISOString()
+      });
     }
   };
   const timeUntilReset = () => {
@@ -96,11 +134,11 @@ export default function FarmingScreen({
       {/* Header with Mascot */}
       <div className="text-center pt-4">
         <div className="w-20 h-20 mx-auto bg-gradient-primary rounded-full flex items-center justify-center tonix-glow p-1 mb-3 overflow-hidden">
-          {user?.photo_url ? <img src={user.photo_url} alt={`${user.first_name}'s Profile`} className="w-full h-full object-cover rounded-full" /> : <img src={mascotHead} alt="TONIX Mascot" className="w-full h-full object-contain p-2" />}
+          {telegramUser?.photo_url ? <img src={telegramUser.photo_url} alt={`${telegramUser.first_name}'s Profile`} className="w-full h-full object-cover rounded-full" /> : <img src={mascotHead} alt="TONIX Mascot" className="w-full h-full object-contain p-2" />}
         </div>
-        <h1 className="text-xl font-bold text-gradient">{user?.first_name || 'TONIX Farm'}</h1>
+        <h1 className="text-xl font-bold text-gradient">{telegramUser?.first_name || 'TONIX Farm'}</h1>
         <p className="text-sm text-muted-foreground">
-          @{user?.username || user?.first_name || 'tonixuser'}
+          @{telegramUser?.username || telegramUser?.first_name || 'tonixuser'}
         </p>
       </div>
 
