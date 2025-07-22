@@ -128,10 +128,7 @@ export default function FarmingScreen({
         
         {/* Countdown section */}
         <div className="text-center mb-6 py-4 bg-black/20 rounded-lg">
-          <p className="text-pink-400 text-sm mb-3 flex items-center justify-center">
-            <span className="mr-2">⏰</span>
-            Come back in {timeUntilReset()} for your next check-in.
-          </p>
+          
           <div className="mt-3">
             <p className="text-gray-400 text-xs mb-2 uppercase tracking-wide">Next check-in in:</p>
             <p className="text-orange-500 text-xl font-mono font-bold">{timeUntilReset()}</p>
