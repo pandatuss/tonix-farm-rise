@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Gift, Clock, Calendar, ExternalLink, Twitter, Users } from 'lucide-react';
+import { Gift, Clock, Calendar, ExternalLink, Twitter, Users, Check } from 'lucide-react';
 
 interface TasksScreenProps {
   onClaimDaily: () => void;
@@ -216,14 +216,20 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
                     </div>
                   </div>
                 </div>
-                {!specialTasksCompleted.followX && (
-                  <Button 
-                    onClick={() => handleSpecialTask('followX', 'https://twitter.com/tonixglobal')}
-                    className="bg-blue-500 hover:bg-blue-600 text-white ml-4"
-                  >
-                    {specialTasksOpened.followX ? 'Claim' : 'Open Link'}
-                  </Button>
-                )}
+                <Button 
+                  onClick={() => handleSpecialTask('followX', 'https://twitter.com/tonixglobal')}
+                  className={specialTasksCompleted.followX 
+                    ? "bg-green-500 text-white ml-4 cursor-default" 
+                    : "bg-blue-500 hover:bg-blue-600 text-white ml-4"
+                  }
+                  disabled={specialTasksCompleted.followX}
+                >
+                  {specialTasksCompleted.followX ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    specialTasksOpened.followX ? 'Claim' : 'Open Link'
+                  )}
+                </Button>
               </div>
             </div>
           </Card>
@@ -247,14 +253,20 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
                     </div>
                   </div>
                 </div>
-                {!specialTasksCompleted.joinChannel && (
-                  <Button 
-                    onClick={() => handleSpecialTask('joinChannel', 'https://t.me/tonixglobal')}
-                    className="bg-blue-500 hover:bg-blue-600 text-white ml-4"
-                  >
-                    {specialTasksOpened.joinChannel ? 'Claim' : 'Open Link'}
-                  </Button>
-                )}
+                <Button 
+                  onClick={() => handleSpecialTask('joinChannel', 'https://t.me/tonixglobal')}
+                  className={specialTasksCompleted.joinChannel 
+                    ? "bg-green-500 text-white ml-4 cursor-default" 
+                    : "bg-blue-500 hover:bg-blue-600 text-white ml-4"
+                  }
+                  disabled={specialTasksCompleted.joinChannel}
+                >
+                  {specialTasksCompleted.joinChannel ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    specialTasksOpened.joinChannel ? 'Claim' : 'Open Link'
+                  )}
+                </Button>
               </div>
             </div>
           </Card>
@@ -278,14 +290,20 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
                     </div>
                   </div>
                 </div>
-                {!specialTasksCompleted.joinGroup && (
-                  <Button 
-                    onClick={() => handleSpecialTask('joinGroup', 'https://t.me/tonixglobal_chat')}
-                    className="bg-blue-500 hover:bg-blue-600 text-white ml-4"
-                  >
-                    {specialTasksOpened.joinGroup ? 'Claim' : 'Open Link'}
-                  </Button>
-                )}
+                <Button 
+                  onClick={() => handleSpecialTask('joinGroup', 'https://t.me/tonixglobal_chat')}
+                  className={specialTasksCompleted.joinGroup 
+                    ? "bg-green-500 text-white ml-4 cursor-default" 
+                    : "bg-blue-500 hover:bg-blue-600 text-white ml-4"
+                  }
+                  disabled={specialTasksCompleted.joinGroup}
+                >
+                  {specialTasksCompleted.joinGroup ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    specialTasksOpened.joinGroup ? 'Claim' : 'Open Link'
+                  )}
+                </Button>
               </div>
             </div>
           </Card>
