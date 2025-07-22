@@ -47,6 +47,7 @@ const Index = () => {
     toast({
       title: "Boost Feature",
       description: "TON wallet integration coming soon!",
+      duration: 2000
     });
   };
 
@@ -56,12 +57,14 @@ const Index = () => {
       toast({
         title: "Daily Bonus Claimed!",
         description: "You received 5 TONIX",
+        duration: 2000
       });
     } catch (error) {
       toast({
         title: "Error",
         description: "Daily bonus already claimed today",
         variant: "destructive",
+        duration: 2000
       });
     }
   };
@@ -72,12 +75,14 @@ const Index = () => {
       toast({
         title: "Weekly Bonus Claimed!",
         description: "You received 25 TONIX",
+        duration: 2000
       });
     } catch (error) {
       toast({
         title: "Error",
         description: "Weekly bonus already claimed this week",
         variant: "destructive",
+        duration: 2000
       });
     }
   };
@@ -96,6 +101,7 @@ const Index = () => {
     toast({
       title: "Check-in Successful!",
       description: "Daily streak maintained!",
+      duration: 2000
     });
   };
 
@@ -105,6 +111,7 @@ const Index = () => {
       toast({
         title: "Task Completed!",
         description: `You received ${points} TONIX`,
+        duration: 2000
       });
     } catch (error) {
       // Silently handle errors - don't show error message to user

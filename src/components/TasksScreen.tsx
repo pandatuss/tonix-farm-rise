@@ -122,7 +122,8 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
         toast({
           title: "🎉 Daily Bonus Claimed!",
           description: "You successfully claimed 5 TONIX rewards!",
-          className: "mt-24"
+          className: "mt-24",
+          duration: 2000
         });
       } catch (error) {
         console.log("Daily bonus claim failed:", error);
@@ -141,7 +142,8 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
         toast({
           title: "🎉 Weekly Bonus Claimed!",
           description: "You successfully claimed 25 TONIX rewards!",
-          className: "mt-24"
+          className: "mt-24",
+          duration: 2000
         });
       } catch (error) {
         console.log("Weekly bonus claim failed:", error);
@@ -215,7 +217,8 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
         toast({
           title: "🎉 Task Completed!",
           description: `You successfully completed "${taskNames[taskType]}" and earned 5 TONIX rewards!`,
-          className: "mt-24"
+          className: "mt-24",
+          duration: 2000
         });
       } catch (error) {
         console.log("Task completion failed:", error);

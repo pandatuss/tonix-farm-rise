@@ -128,7 +128,8 @@ export default function FarmingScreen({
       toast({
         title: "🎉 TONIX Collected!",
         description: `You successfully collected ${accumulatedTonix.toFixed(3)} TONIX!`,
-        className: "mt-24"
+        className: "mt-24",
+        duration: 2000
       });
       
       setAccumulatedTonix(0);
@@ -148,7 +149,8 @@ export default function FarmingScreen({
     toast({
       title: "⚡ Boost Feature",
       description: "TON wallet integration coming soon for rate boosting!",
-      className: "mt-24"
+      className: "mt-24",
+      duration: 2000
     });
   };
   const timeUntilReset = () => {

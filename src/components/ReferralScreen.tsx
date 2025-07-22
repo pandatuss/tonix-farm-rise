@@ -29,6 +29,7 @@ export default function ReferralScreen() {
     toast({
       title: "Copied!",
       description: "Referral code copied to clipboard",
+      duration: 2000
     });
   };
 
@@ -44,6 +45,7 @@ export default function ReferralScreen() {
       toast({
         title: "Link copied!",
         description: "Share link copied to clipboard",
+        duration: 2000
       });
     }
   };
@@ -59,7 +61,8 @@ export default function ReferralScreen() {
             title: "Invalid Code",
             description: "Please enter a valid referral code",
             variant: "destructive",
-            className: "mt-[96px]"
+            className: "mt-[96px]",
+            duration: 2000
           });
           return;
         }
@@ -69,7 +72,8 @@ export default function ReferralScreen() {
             title: "Invalid Code",
             description: "You cannot refer yourself",
             variant: "destructive",
-            className: "mt-[96px]"
+            className: "mt-[96px]",
+            duration: 2000
           });
           return;
         }
@@ -86,7 +90,8 @@ export default function ReferralScreen() {
         toast({
           title: "🎉 Referral Success!",
           description: "You both received 5 TONIX bonus!",
-          className: "mt-[96px]"
+          className: "mt-[96px]",
+          duration: 2000
         });
         
         setReferralCode('');
@@ -96,7 +101,8 @@ export default function ReferralScreen() {
           title: "Error",
           description: "Failed to process referral code",
           variant: "destructive",
-          className: "mt-[96px]"
+          className: "mt-[96px]",
+          duration: 2000
         });
       }
     }
