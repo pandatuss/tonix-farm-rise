@@ -14,23 +14,11 @@ export default function InventoryScreen() {
       <Card className="tonix-card p-8 text-center">
         <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-muted-foreground mb-2">
-          Your inventory is empty
+          Coming Soon
         </h3>
         <p className="text-sm text-muted-foreground mb-6">
-          Complete tasks and open cases to collect items
+          Inventory system is under development. Stay tuned for exciting updates!
         </p>
-        
-        <div className="space-y-3">
-          <Button className="w-full tonix-button bg-gradient-primary hover:opacity-90">
-            <ShoppingBag className="w-5 h-5 mr-2" />
-            Open Cases
-          </Button>
-          
-          <Button variant="outline" className="w-full tonix-button border-tonix-primary text-tonix-primary hover:bg-tonix-primary hover:text-primary-foreground">
-            <Gift className="w-5 h-5 mr-2" />
-            Send Gifts
-          </Button>
-        </div>
       </Card>
 
       {/* Coming Soon Features */}
