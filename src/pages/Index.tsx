@@ -6,17 +6,29 @@ import InventoryScreen from '@/components/InventoryScreen';
 import ReferralScreen from '@/components/ReferralScreen';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@/hooks/useUser';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('farm');
-  const [tonixBalance, setTonixBalance] = useState(2600);
-  const [farmingRate, setFarmingRate] = useState(10.0);
-  const [dailyStreak, setDailyStreak] = useState(7);
-  const [todayEarnings, setTodayEarnings] = useState(32);
+  const { profile, updateProfile, completeTask, isLoading } = useUser();
   const { toast } = useToast();
 
-  const handleCollect = (amount: number) => {
-    setTonixBalance(prev => prev + amount);
+  // Fallback values when profile is loading
+  const tonixBalance = profile?.tonix_balance || 0;
+  const farmingRate = profile?.farming_rate || 10.0;
+  const dailyStreak = profile?.daily_streak || 0;
+  const todayEarnings = profile?.today_earnings || 0;
+  const readyToCollect = profile?.ready_to_collect || 0;
+
+  const handleCollect = async (amount: number) => {
+    if (!profile) return;
+    
+    await updateProfile({
+      tonix_balance: profile.tonix_balance + amount,
+      ready_to_collect: Math.max(0, profile.ready_to_collect - amount),
+      last_collect: new Date().toISOString(),
+    });
+    
     toast({
       title: "TONIX Collected!",
       description: `You collected ${amount.toFixed(3)} TONIX`,
@@ -30,24 +42,49 @@ const Index = () => {
     });
   };
 
-  const handleClaimDaily = () => {
-    setTonixBalance(prev => prev + 100);
-    toast({
-      title: "Daily Bonus Claimed!",
-      description: "You received 100 TONIX",
-    });
+  const handleClaimDaily = async () => {
+    try {
+      await completeTask('daily', 'daily_bonus', 100);
+      toast({
+        title: "Daily Bonus Claimed!",
+        description: "You received 100 TONIX",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Daily bonus already claimed today",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleClaimWeekly = () => {
-    setTonixBalance(prev => prev + 500);
-    toast({
-      title: "Weekly Bonus Claimed!",
-      description: "You received 500 TONIX",
-    });
+  const handleClaimWeekly = async () => {
+    try {
+      await completeTask('weekly', 'weekly_bonus', 500);
+      toast({
+        title: "Weekly Bonus Claimed!",
+        description: "You received 500 TONIX",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Weekly bonus already claimed this week",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleCheckIn = () => {
-    setDailyStreak(prev => prev + 1);
+  const handleCheckIn = async () => {
+    if (!profile) return;
+    
+    const today = new Date().toISOString().split('T')[0];
+    const newStreak = profile.last_check_in === today ? profile.daily_streak : profile.daily_streak + 1;
+    
+    await updateProfile({
+      daily_streak: newStreak,
+      last_check_in: today,
+    });
+    
     toast({
       title: "Check-in Successful!",
       description: "Daily streak maintained!",

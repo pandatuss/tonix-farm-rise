@@ -14,7 +14,128 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          daily_streak: number
+          farming_rate: number
+          first_name: string | null
+          id: string
+          last_check_in: string | null
+          last_collect: string | null
+          last_name: string | null
+          ready_to_collect: number
+          telegram_id: number
+          telegram_username: string | null
+          today_earnings: number
+          tonix_balance: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_streak?: number
+          farming_rate?: number
+          first_name?: string | null
+          id?: string
+          last_check_in?: string | null
+          last_collect?: string | null
+          last_name?: string | null
+          ready_to_collect?: number
+          telegram_id: number
+          telegram_username?: string | null
+          today_earnings?: number
+          tonix_balance?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_streak?: number
+          farming_rate?: number
+          first_name?: string | null
+          id?: string
+          last_check_in?: string | null
+          last_collect?: string | null
+          last_name?: string | null
+          ready_to_collect?: number
+          telegram_id?: number
+          telegram_username?: string | null
+          today_earnings?: number
+          tonix_balance?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referred_id: string
+          referrer_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referred_id: string
+          referrer_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referred_id?: string
+          referrer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_id_fkey"
+            columns: ["referred_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_completions: {
+        Row: {
+          completed_at: string
+          id: string
+          reward_amount: number | null
+          task_id: string
+          task_type: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          reward_amount?: number | null
+          task_id: string
+          task_type: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          reward_amount?: number | null
+          task_id?: string
+          task_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
