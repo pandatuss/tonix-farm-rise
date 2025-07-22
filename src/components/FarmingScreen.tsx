@@ -26,6 +26,7 @@ export default function FarmingScreen({
   const [checkedInToday, setCheckedInToday] = useState(false);
   const [accumulatedTonix, setAccumulatedTonix] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [showTimer, setShowTimer] = useState(false);
   const {
     user
   } = useTelegram();
@@ -42,6 +43,7 @@ export default function FarmingScreen({
     if (!checkedInToday) {
       onCheckIn();
       setCheckedInToday(true);
+      setShowTimer(true);
     }
   };
   const handleCollect = () => {
@@ -53,10 +55,16 @@ export default function FarmingScreen({
   };
   const timeUntilReset = () => {
     const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    const diff = tomorrow.getTime() - now.getTime();
+    // Convert to UTC+4 timezone
+    const utc4Now = new Date(now.getTime() + (4 * 60 * 60 * 1000));
+    const tomorrow = new Date(utc4Now);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    tomorrow.setUTCHours(0, 0, 0, 0);
+    
+    // Convert back to local time for calculation
+    const tomorrowLocal = new Date(tomorrow.getTime() - (4 * 60 * 60 * 1000));
+    const diff = tomorrowLocal.getTime() - now.getTime();
+    
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor(diff % (1000 * 60 * 60) / (1000 * 60));
     const seconds = Math.floor(diff % (1000 * 60) / 1000);
@@ -127,14 +135,15 @@ export default function FarmingScreen({
           </div>
         </div>
         
-        {/* Countdown section */}
-        <div className="text-center mb-6 py-4 bg-black/20 rounded-lg">
-          
-          <div className="mt-3">
-            <p className="text-gray-400 text-xs mb-2 uppercase tracking-wide">Next check-in in:</p>
-            <p className="text-orange-500 text-xl font-mono font-bold">{timeUntilReset()}</p>
+        {/* Countdown section - only show after check-in */}
+        {showTimer && (
+          <div className="text-center mb-6 py-4 bg-black/20 rounded-lg">
+            <div className="mt-3">
+              <p className="text-gray-400 text-xs mb-2 uppercase tracking-wide">Next check-in in:</p>
+              <p className="text-orange-500 text-xl font-mono font-bold">{timeUntilReset()}</p>
+            </div>
           </div>
-        </div>
+        )}
         
         {/* Check-in button or status */}
         {!checkedInToday ? <Button onClick={handleCheckIn} className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg">
