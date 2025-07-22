@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Gift, Clock, Calendar, ExternalLink, Twitter, Users, Check } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
+import { useToast } from '@/hooks/use-toast';
 
 interface TasksScreenProps {
   onClaimDaily: () => void;
@@ -14,6 +15,7 @@ interface TasksScreenProps {
 
 export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, onClaimSpecialTask }: TasksScreenProps) {
   const { taskCompletions, completeTask } = useUser();
+  const { toast } = useToast();
   const [dailyClaimedToday, setDailyClaimedToday] = useState(false);
   const [weeklyClaimedThisWeek, setWeeklyClaimedThisWeek] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -116,6 +118,12 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
         onClaimDaily();
         setDailyClaimedToday(true);
         setShowDailyTimer(true);
+        
+        toast({
+          title: "🎉 Daily Bonus Claimed!",
+          description: "You successfully claimed 5 TONIX rewards!",
+          className: "mt-24"
+        });
       } catch (error) {
         console.log("Daily bonus claim failed:", error);
       }
@@ -129,6 +137,12 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
         onClaimWeekly();
         setWeeklyClaimedThisWeek(true);
         setShowWeeklyTimer(true);
+        
+        toast({
+          title: "🎉 Weekly Bonus Claimed!",
+          description: "You successfully claimed 25 TONIX rewards!",
+          className: "mt-24"
+        });
       } catch (error) {
         console.log("Weekly bonus claim failed:", error);
       }
@@ -191,6 +205,18 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
       try {
         await completeTask('special', taskId, 5);
         onClaimSpecialTask(5);
+        
+        const taskNames = {
+          followX: 'Follow on X',
+          joinChannel: 'Join Telegram Channel',
+          joinGroup: 'Join Telegram Group'
+        };
+        
+        toast({
+          title: "🎉 Task Completed!",
+          description: `You successfully completed "${taskNames[taskType]}" and earned 5 TONIX rewards!`,
+          className: "mt-24"
+        });
       } catch (error) {
         console.log("Task completion failed:", error);
       }
