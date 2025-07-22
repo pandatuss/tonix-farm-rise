@@ -125,7 +125,7 @@ export default function FarmingScreen({ tonixBalance, farmingRate, dailyStreak, 
         {/* Header with flame icon and streak count */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
               <img 
                 src="/lovable-uploads/8657a57d-1f6d-4c60-9e97-e85c55e87b4d.png" 
                 alt="Fire" 
