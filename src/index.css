@@ -2,41 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* TONIX Farm Design System - Dark theme with TON-inspired gradients */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 220 27% 8%;
+    --foreground: 220 9% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 220 27% 12%;
+    --card-foreground: 220 9% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 220 27% 12%;
+    --popover-foreground: 220 9% 98%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 206 100% 50%;
+    --primary-foreground: 220 27% 8%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 27% 16%;
+    --secondary-foreground: 220 9% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 27% 16%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 206 100% 50%;
+    --accent-foreground: 220 27% 8%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 220 9% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 27% 16%;
+    --input: 220 27% 16%;
+    --ring: 206 100% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* TONIX Farm custom tokens */
+    --tonix-primary: 206 100% 50%;
+    --tonix-primary-light: 206 100% 65%;
+    --tonix-secondary: 270 100% 65%;
+    --tonix-success: 142 76% 36%;
+    --tonix-warning: 48 96% 53%;
+    --tonix-surface: 220 27% 12%;
+    --tonix-surface-elevated: 220 27% 16%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--tonix-primary)), hsl(var(--tonix-secondary)));
+    --gradient-surface: linear-gradient(135deg, hsl(var(--tonix-surface)), hsl(var(--tonix-surface-elevated)));
+    --gradient-glow: radial-gradient(circle at center, hsl(var(--tonix-primary) / 0.15), transparent 70%);
+    
+    /* Shadows */
+    --shadow-glow: 0 0 20px hsl(var(--tonix-primary) / 0.3);
+    --shadow-card: 0 8px 32px hsl(220 27% 4% / 0.5);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +120,77 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-x-hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  }
+}
+
+@layer components {
+  /* TONIX Farm component styles */
+  .tonix-gradient {
+    background: var(--gradient-primary);
+  }
+  
+  .tonix-surface {
+    background: var(--gradient-surface);
+  }
+  
+  .tonix-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .tonix-card {
+    @apply bg-card border border-border rounded-xl shadow-lg;
+    box-shadow: var(--shadow-card);
+  }
+  
+  .tonix-button {
+    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform;
+    transition: var(--transition-smooth);
+  }
+  
+  .tonix-button:hover {
+    transform: translateY(-2px);
+  }
+  
+  .tonix-button:active {
+    transform: translateY(0);
+  }
+  
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  .farming-pulse {
+    animation: farming-pulse 3s ease-in-out infinite;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(var(--tonix-primary) / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px hsl(var(--tonix-primary) / 0.6);
+  }
+}
+
+@keyframes farming-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
   }
 }

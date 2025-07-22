@@ -61,7 +61,21 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				tonix: {
+					primary: 'hsl(var(--tonix-primary))',
+					'primary-light': 'hsl(var(--tonix-primary-light))',
+					secondary: 'hsl(var(--tonix-secondary))',
+					success: 'hsl(var(--tonix-success))',
+					warning: 'hsl(var(--tonix-warning))',
+					surface: 'hsl(var(--tonix-surface))',
+					'surface-elevated': 'hsl(var(--tonix-surface-elevated))'
 				}
+			},
+			backgroundImage: {
+				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-surface': 'var(--gradient-surface)',
+				'gradient-glow': 'var(--gradient-glow)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

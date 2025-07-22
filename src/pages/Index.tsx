@@ -1,12 +1,91 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import FarmingScreen from '@/components/FarmingScreen';
+import TasksScreen from '@/components/TasksScreen';
+import LeaderboardScreen from '@/components/LeaderboardScreen';
+import InventoryScreen from '@/components/InventoryScreen';
+import ReferralScreen from '@/components/ReferralScreen';
+import Navigation from '@/components/Navigation';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
+  const [activeTab, setActiveTab] = useState('farm');
+  const [tonixBalance, setTonixBalance] = useState(2500);
+  const [farmingRate, setFarmingRate] = useState(170.0);
+  const { toast } = useToast();
+
+  const handleCollect = (amount: number) => {
+    setTonixBalance(prev => prev + amount);
+    toast({
+      title: "TONIX Collected!",
+      description: `You collected ${amount.toFixed(3)} TONIX`,
+    });
+  };
+
+  const handleBoost = () => {
+    toast({
+      title: "Boost Feature",
+      description: "TON wallet integration coming soon!",
+    });
+  };
+
+  const handleClaimDaily = () => {
+    setTonixBalance(prev => prev + 100);
+    toast({
+      title: "Daily Bonus Claimed!",
+      description: "You received 100 TONIX",
+    });
+  };
+
+  const handleClaimWeekly = () => {
+    setTonixBalance(prev => prev + 500);
+    toast({
+      title: "Weekly Bonus Claimed!",
+      description: "You received 500 TONIX",
+    });
+  };
+
+  const handleCheckIn = () => {
+    setTonixBalance(prev => prev + 50);
+    toast({
+      title: "Check-in Successful!",
+      description: "You received 50 TONIX streak bonus",
+    });
+  };
+
+  const renderScreen = () => {
+    switch (activeTab) {
+      case 'farm':
+        return (
+          <FarmingScreen
+            tonixBalance={tonixBalance}
+            farmingRate={farmingRate}
+            onCollect={handleCollect}
+            onBoost={handleBoost}
+          />
+        );
+      case 'tasks':
+        return (
+          <TasksScreen
+            onClaimDaily={handleClaimDaily}
+            onClaimWeekly={handleClaimWeekly}
+            onCheckIn={handleCheckIn}
+          />
+        );
+      case 'leaderboard':
+        return <LeaderboardScreen />;
+      case 'inventory':
+        return <InventoryScreen />;
+      case 'referral':
+        return <ReferralScreen />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background pb-16">
+      {renderScreen()}
+      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 };
