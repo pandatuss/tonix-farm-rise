@@ -7,6 +7,7 @@ import ReferralScreen from '@/components/ReferralScreen';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@/hooks/useUser';
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('farm');
@@ -28,6 +29,18 @@ const Index = () => {
       ready_to_collect: Math.max(0, profile.ready_to_collect - amount),
       last_collect: new Date().toISOString(),
     });
+    
+    // Process referral commission
+    try {
+      await supabase.functions.invoke('process-referral-commission', {
+        body: { 
+          userId: profile.id, 
+          collectedAmount: amount 
+        }
+      });
+    } catch (error) {
+      console.log('Commission processing failed:', error);
+    }
     
     toast({
       title: "TONIX Collected!",

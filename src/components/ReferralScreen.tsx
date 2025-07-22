@@ -5,15 +5,23 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Users, Copy, Share, Gift } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTelegram } from '@/hooks/useTelegram';
+import { useUser } from '@/hooks/useUser';
 
 export default function ReferralScreen() {
   const [referralCode, setReferralCode] = useState('');
-  const [userReferralCode] = useState('TONIX2024USER');
-  const [referralStats] = useState({
-    totalReferred: 12,
-    totalEarned: 3420
-  });
   const { toast } = useToast();
+  const { user: telegramUser } = useTelegram();
+  const { profile, referrals, createReferral, updateProfile } = useUser();
+  
+  // Use Telegram ID as referral code
+  const userReferralCode = telegramUser?.id?.toString() || 'Loading...';
+  
+  // Calculate referral stats from actual data
+  const referralStats = {
+    totalReferred: referrals.length,
+    totalEarned: referrals.length * 5 // 5 TONIX per referral + commission earnings
+  };
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(userReferralCode);
@@ -39,13 +47,53 @@ export default function ReferralScreen() {
     }
   };
 
-  const handleSubmitCode = () => {
-    if (referralCode.trim()) {
-      toast({
-        title: "Code submitted!",
-        description: "Referral bonus will be added to your account",
-      });
-      setReferralCode('');
+  const handleSubmitCode = async () => {
+    if (referralCode.trim() && telegramUser?.id) {
+      try {
+        // Check if it's a valid Telegram ID and not their own
+        const referredTelegramId = parseInt(referralCode.trim());
+        
+        if (isNaN(referredTelegramId)) {
+          toast({
+            title: "Invalid Code",
+            description: "Please enter a valid referral code",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        if (referredTelegramId === telegramUser.id) {
+          toast({
+            title: "Invalid Code",
+            description: "You cannot refer yourself",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        // Create referral and award bonuses
+        await createReferral(referredTelegramId);
+        
+        // Award 5 TONIX bonus to the user
+        const currentBalance = profile?.tonix_balance || 0;
+        await updateProfile({
+          tonix_balance: currentBalance + 5
+        });
+        
+        toast({
+          title: "🎉 Referral Success!",
+          description: "You both received 5 TONIX bonus!",
+          className: "mt-24"
+        });
+        
+        setReferralCode('');
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to process referral code",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -53,7 +101,7 @@ export default function ReferralScreen() {
     <div className="p-6 space-y-6 mt-24">
       <div className="text-center mb-6">
         <h1 className="text-3xl font-bold text-gradient mb-2">Invite Friends</h1>
-        <p className="text-muted-foreground">Earn 10% of your friends' TONIX forever</p>
+        <p className="text-muted-foreground">Earn 5 TONIX per friend + 10% commission forever</p>
       </div>
 
       {/* Referral Stats */}
@@ -146,15 +194,15 @@ export default function ReferralScreen() {
         <div className="space-y-2 text-sm text-muted-foreground">
           <div className="flex items-center space-x-2">
             <Badge variant="secondary" className="w-6 h-6 rounded-full flex items-center justify-center p-0 text-xs">1</Badge>
-            <p>Share your referral code or link with friends</p>
+            <p>Share your Telegram ID as referral code with friends</p>
           </div>
           <div className="flex items-center space-x-2">
             <Badge variant="secondary" className="w-6 h-6 rounded-full flex items-center justify-center p-0 text-xs">2</Badge>
-            <p>They join using your code and start farming</p>
+            <p>Both you and your friend get 5 TONIX bonus when they join</p>
           </div>
           <div className="flex items-center space-x-2">
             <Badge variant="secondary" className="w-6 h-6 rounded-full flex items-center justify-center p-0 text-xs">3</Badge>
-            <p>You earn 10% of all TONIX they farm, forever!</p>
+            <p>You earn 10% commission on all TONIX they farm, forever!</p>
           </div>
         </div>
       </Card>
