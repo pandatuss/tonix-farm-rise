@@ -224,7 +224,7 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
   };
 
   return (
-    <div className="p-4 mt-24">
+    <div className="p-4 mt-24 h-screen overflow-hidden">{/* Fixed height with overflow hidden */}
       <Tabs defaultValue="daily" className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-6 bg-background border">
           <TabsTrigger value="daily" className="flex items-center gap-2">
