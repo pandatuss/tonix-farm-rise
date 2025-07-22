@@ -37,10 +37,10 @@ export default function ReferralScreen() {
       navigator.share({
         title: 'Join TONIX Farm',
         text: `Join me on TONIX Farm and earn TONIX together! Use my referral code: ${userReferralCode}`,
-        url: `https://t.me/tonixfarmbot?start=${userReferralCode}`
+        url: `https://t.me/tonixglobalbot?start=${userReferralCode}`
       });
     } else {
-      navigator.clipboard.writeText(`https://t.me/tonixfarmbot?start=${userReferralCode}`);
+      navigator.clipboard.writeText(`https://t.me/tonixglobalbot?start=${userReferralCode}`);
       toast({
         title: "Link copied!",
         description: "Share link copied to clipboard",
