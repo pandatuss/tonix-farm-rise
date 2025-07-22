@@ -256,7 +256,7 @@ export default function TasksScreen({
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Weekly Bonus</h3>
-                  <p className="text-sm text-muted-foreground">Claim every 7 days</p>
+                  <p className="text-sm text-muted-foreground">Claim every Monday </p>
                 </div>
               </div>
               <div className="text-right">
