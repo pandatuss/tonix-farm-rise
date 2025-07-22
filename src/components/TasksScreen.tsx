@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Calendar, Gift, Clock } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Gift, Clock, Calendar, ExternalLink, Twitter, Users } from 'lucide-react';
 
 interface TasksScreenProps {
   onClaimDaily: () => void;
@@ -11,18 +11,13 @@ interface TasksScreenProps {
 }
 
 export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn }: TasksScreenProps) {
-  const [dailyStreak, setDailyStreak] = useState(7);
   const [dailyClaimedToday, setDailyClaimedToday] = useState(false);
   const [weeklyClaimedThisWeek, setWeeklyClaimedThisWeek] = useState(false);
-  const [checkedInToday, setCheckedInToday] = useState(false);
-
-  const handleDailyCheckIn = () => {
-    if (!checkedInToday) {
-      onCheckIn();
-      setCheckedInToday(true);
-      setDailyStreak(prev => prev + 1);
-    }
-  };
+  const [specialTasksCompleted, setSpecialTasksCompleted] = useState({
+    followX: false,
+    joinChannel: false,
+    joinGroup: false,
+  });
 
   const handleDailyClaim = () => {
     if (!dailyClaimedToday) {
@@ -46,151 +41,204 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn }: 
     const diff = tomorrow.getTime() - now.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${minutes}m`;
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
+
+  const handleSpecialTask = (taskType: 'followX' | 'joinChannel' | 'joinGroup', url: string) => {
+    window.open(url, '_blank');
+    // Mark as completed after opening the link
+    setSpecialTasksCompleted(prev => ({
+      ...prev,
+      [taskType]: true
+    }));
   };
 
   return (
-    <div className="p-6 space-y-6 mt-24">
-      <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold text-gradient mb-2">Daily Tasks</h1>
-        <p className="text-muted-foreground">Complete tasks to earn bonus TONIX</p>
-      </div>
+    <div className="p-4 mt-24">
+      <Tabs defaultValue="daily" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-6 bg-background border">
+          <TabsTrigger value="daily" className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            Daily
+          </TabsTrigger>
+          <TabsTrigger value="weekly" className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            Weekly
+          </TabsTrigger>
+          <TabsTrigger value="special" className="flex items-center gap-2">
+            <Gift className="w-4 h-4" />
+            Special
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Daily Streak */}
-      <Card className="tonix-card p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <Calendar className="w-6 h-6 text-tonix-primary" />
-            <div>
-              <h3 className="text-xl font-bold">Daily Check-in</h3>
-              <p className="text-sm text-muted-foreground">Maintain your streak</p>
+        <TabsContent value="daily" className="space-y-4">
+          <Card className="bg-card border border-border">
+            <div className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <Gift className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Daily Bonus</h3>
+                  <p className="text-sm text-muted-foreground">Claim every 24 hours</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-xl font-bold text-blue-400">500</div>
+                <div className="text-sm text-muted-foreground">POINTS</div>
+              </div>
             </div>
-          </div>
-          <Badge variant="secondary" className="bg-tonix-primary/20 text-tonix-primary">
-            {dailyStreak} days
-          </Badge>
-        </div>
-        
-        <div className="mb-4">
-          <p className="text-center text-lg font-semibold text-tonix-success mb-2">
-            +50 TONIX Bonus
-          </p>
-          <p className="text-sm text-center text-muted-foreground">
-            Resets in: {timeUntilReset()}
-          </p>
-        </div>
-        
-        <Button
-          onClick={handleDailyCheckIn}
-          disabled={checkedInToday}
-          className="w-full tonix-button bg-gradient-primary hover:opacity-90 disabled:opacity-50"
-        >
-          {checkedInToday ? (
-            <>
-              <CheckCircle className="w-5 h-5 mr-2" />
-              Checked In Today
-            </>
-          ) : (
-            <>
-              <Calendar className="w-5 h-5 mr-2" />
-              Check In
-            </>
-          )}
-        </Button>
-      </Card>
+            
+            {!dailyClaimedToday ? (
+              <div className="p-4 bg-muted/20 border-t border-border">
+                <div className="text-center mb-3">
+                  <Clock className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+                  <div className="text-sm text-muted-foreground">Next claim in:</div>
+                  <div className="text-lg font-mono text-blue-400">{timeUntilReset()}</div>
+                </div>
+                <Button 
+                  onClick={handleDailyClaim}
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  Claim Daily Bonus
+                </Button>
+              </div>
+            ) : (
+              <div className="p-4 bg-muted/20 border-t border-border text-center">
+                <div className="text-muted-foreground">Daily Bonus Claimed</div>
+              </div>
+            )}
+          </Card>
+        </TabsContent>
 
-      {/* Daily Bonus */}
-      <Card className="tonix-card p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <Gift className="w-6 h-6 text-tonix-warning" />
-            <div>
-              <h3 className="text-xl font-bold">Daily Bonus</h3>
-              <p className="text-sm text-muted-foreground">Free TONIX every 24 hours</p>
+        <TabsContent value="weekly" className="space-y-4">
+          <Card className="bg-card border border-border">
+            <div className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Weekly Bonus</h3>
+                  <p className="text-sm text-muted-foreground">Claim every 7 days</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-xl font-bold text-purple-400">2500</div>
+                <div className="text-sm text-muted-foreground">POINTS</div>
+              </div>
             </div>
-          </div>
-          <Badge variant="secondary" className="bg-tonix-warning/20 text-tonix-warning">
-            +100 TONIX
-          </Badge>
-        </div>
-        
-        <div className="mb-4">
-          <p className="text-sm text-center text-muted-foreground">
-            Next claim in: {timeUntilReset()}
-          </p>
-        </div>
-        
-        <Button
-          onClick={handleDailyClaim}
-          disabled={dailyClaimedToday}
-          variant="outline"
-          className="w-full tonix-button border-tonix-warning text-tonix-warning hover:bg-tonix-warning hover:text-primary-foreground disabled:opacity-50"
-        >
-          {dailyClaimedToday ? (
-            <>
-              <CheckCircle className="w-5 h-5 mr-2" />
-              Claimed Today
-            </>
-          ) : (
-            <>
-              <Gift className="w-5 h-5 mr-2" />
-              Claim Daily Bonus
-            </>
-          )}
-        </Button>
-      </Card>
+            
+            {!weeklyClaimedThisWeek ? (
+              <div className="p-4 bg-muted/20 border-t border-border">
+                <Button 
+                  onClick={handleWeeklyClaim}
+                  className="w-full bg-purple-500 hover:bg-purple-600 text-white"
+                >
+                  Claim Weekly Bonus
+                </Button>
+              </div>
+            ) : (
+              <div className="p-4 bg-muted/20 border-t border-border text-center">
+                <div className="text-muted-foreground">Weekly Bonus Claimed</div>
+              </div>
+            )}
+          </Card>
+        </TabsContent>
 
-      {/* Weekly Bonus */}
-      <Card className="tonix-card p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <Clock className="w-6 h-6 text-tonix-secondary" />
-            <div>
-              <h3 className="text-xl font-bold">Weekly Bonus</h3>
-              <p className="text-sm text-muted-foreground">Bigger reward every 7 days</p>
+        <TabsContent value="special" className="space-y-4">
+          {/* Follow on X Task */}
+          <Card className="bg-card border border-border">
+            <div className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="w-6 h-6 text-green-500 mt-1">
+                    <Gift className="w-full h-full" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground mb-1">Follow on X</h3>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Follow @tonixglobal on X (formerly Twitter) for the latest updates and announcements. Click to open link.
+                    </p>
+                    <div className="flex items-center gap-1 text-blue-400">
+                      <Twitter className="w-4 h-4" />
+                      <span className="text-sm font-medium">+1,000 points</span>
+                    </div>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => handleSpecialTask('followX', 'https://twitter.com/tonixglobal')}
+                  className="bg-blue-500 hover:bg-blue-600 text-white ml-4"
+                  disabled={specialTasksCompleted.followX}
+                >
+                  {specialTasksCompleted.followX ? 'Completed' : 'Open Link'}
+                </Button>
+              </div>
             </div>
-          </div>
-          <Badge variant="secondary" className="bg-tonix-secondary/20 text-tonix-secondary">
-            +500 TONIX
-          </Badge>
-        </div>
-        
-        <div className="mb-4">
-          <p className="text-sm text-center text-muted-foreground">
-            Resets every Monday at 00:00 UTC
-          </p>
-        </div>
-        
-        <Button
-          onClick={handleWeeklyClaim}
-          disabled={weeklyClaimedThisWeek}
-          variant="outline"
-          className="w-full tonix-button border-tonix-secondary text-tonix-secondary hover:bg-tonix-secondary hover:text-primary-foreground disabled:opacity-50"
-        >
-          {weeklyClaimedThisWeek ? (
-            <>
-              <CheckCircle className="w-5 h-5 mr-2" />
-              Claimed This Week
-            </>
-          ) : (
-            <>
-              <Clock className="w-5 h-5 mr-2" />
-              Claim Weekly Bonus
-            </>
-          )}
-        </Button>
-      </Card>
+          </Card>
 
-      {/* Special Tasks Placeholder */}
-      <Card className="tonix-card p-6 border-dashed border-2 border-muted">
-        <div className="text-center py-8">
-          <Gift className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-muted-foreground mb-2">Special Tasks</h3>
-          <p className="text-sm text-muted-foreground">
-            More exciting challenges coming soon!
-          </p>
-        </div>
-      </Card>
+          {/* Join Telegram Channel Task */}
+          <Card className="bg-card border border-border">
+            <div className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="w-6 h-6 text-green-500 mt-1">
+                    <Gift className="w-full h-full" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground mb-1">Join Telegram Channel</h3>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Join our official Telegram channel @tonixglobal for news and updates. Click to open link.
+                    </p>
+                    <div className="flex items-center gap-1 text-blue-400">
+                      <Users className="w-4 h-4" />
+                      <span className="text-sm font-medium">+500 points</span>
+                    </div>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => handleSpecialTask('joinChannel', 'https://t.me/tonixglobal')}
+                  className="bg-blue-500 hover:bg-blue-600 text-white ml-4"
+                  disabled={specialTasksCompleted.joinChannel}
+                >
+                  {specialTasksCompleted.joinChannel ? 'Completed' : 'Open Link'}
+                </Button>
+              </div>
+            </div>
+          </Card>
+
+          {/* Join Telegram Group Task */}
+          <Card className="bg-card border border-border">
+            <div className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="w-6 h-6 text-green-500 mt-1">
+                    <Gift className="w-full h-full" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground mb-1">Join Telegram Group</h3>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Join our community Telegram group @tonixglobal_chat to chat with other users. Click to open link.
+                    </p>
+                    <div className="flex items-center gap-1 text-blue-400">
+                      <Users className="w-4 h-4" />
+                      <span className="text-sm font-medium">+500 points</span>
+                    </div>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => handleSpecialTask('joinGroup', 'https://t.me/tonixglobal_chat')}
+                  className="bg-blue-500 hover:bg-blue-600 text-white ml-4"
+                  disabled={specialTasksCompleted.joinGroup}
+                >
+                  {specialTasksCompleted.joinGroup ? 'Completed' : 'Open Link'}
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
