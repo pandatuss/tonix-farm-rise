@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Coins, Zap, TrendingUp } from 'lucide-react';
 import mascotHead from '@/assets/tonix-mascot-head.png';
+import { useTelegram } from '@/hooks/useTelegram';
 
 interface FarmingScreenProps {
   tonixBalance: number;
@@ -19,6 +20,7 @@ export default function FarmingScreen({ tonixBalance, farmingRate, dailyStreak, 
   const [checkedInToday, setCheckedInToday] = useState(false);
   const [accumulatedTonix, setAccumulatedTonix] = useState(0);
   const [progress, setProgress] = useState(0);
+  const { user } = useTelegram();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -61,11 +63,21 @@ export default function FarmingScreen({ tonixBalance, farmingRate, dailyStreak, 
     <div className="min-h-screen bg-background p-4 space-y-6">
       {/* Header with Mascot */}
       <div className="text-center pt-4">
-        <div className="w-20 h-20 mx-auto bg-gradient-primary rounded-full flex items-center justify-center tonix-glow p-3 mb-3">
-          <img src={mascotHead} alt="TONIX Mascot" className="w-full h-full object-contain" />
+        <div className="w-20 h-20 mx-auto bg-gradient-primary rounded-full flex items-center justify-center tonix-glow p-1 mb-3 overflow-hidden">
+          {user?.photo_url ? (
+            <img 
+              src={user.photo_url} 
+              alt={`${user.first_name}'s Profile`} 
+              className="w-full h-full object-cover rounded-full" 
+            />
+          ) : (
+            <img src={mascotHead} alt="TONIX Mascot" className="w-full h-full object-contain p-2" />
+          )}
         </div>
         <h1 className="text-xl font-bold text-gradient">TONIX Farm</h1>
-        <p className="text-sm text-muted-foreground">@tonixuser</p>
+        <p className="text-sm text-muted-foreground">
+          @{user?.username || user?.first_name || 'tonixuser'}
+        </p>
       </div>
 
       {/* Balance Section */}
