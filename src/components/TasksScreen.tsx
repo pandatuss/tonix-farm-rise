@@ -76,15 +76,15 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
   };
 
   const handleSpecialTask = (taskType: 'followX' | 'joinChannel' | 'joinGroup', url: string) => {
-    if (!specialTasksOpened[taskType]) {
+    if (!specialTasksOpened[taskType] && !specialTasksCompleted[taskType]) {
       // First click: open link and change button to "Claim"
       window.open(url, '_blank');
       setSpecialTasksOpened(prev => ({
         ...prev,
         [taskType]: true
       }));
-    } else if (!specialTasksCompleted[taskType]) {
-      // Second click: claim reward
+    } else if (specialTasksOpened[taskType] && !specialTasksCompleted[taskType]) {
+      // Second click: claim reward and show checkmark
       onClaimSpecialTask(5);
       setSpecialTasksCompleted(prev => ({
         ...prev,
