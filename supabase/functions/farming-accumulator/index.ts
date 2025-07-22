@@ -5,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface CalculateFarmingRequest {
+interface FarmingRequest {
   userId: string;
 }
 
@@ -20,9 +20,9 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    const { userId } = await req.json() as CalculateFarmingRequest
+    const { userId } = await req.json() as FarmingRequest
 
-    console.log('Calculating farming for user:', userId)
+    console.log('Calculating accumulated farming for user:', userId)
 
     // Get user profile
     const { data: profile, error: profileError } = await supabase
@@ -43,22 +43,33 @@ Deno.serve(async (req) => {
     }
 
     const now = new Date()
-    const lastCollect = profile.last_collect ? new Date(profile.last_collect) : now
     const farmingRate = profile.farming_rate || 1.0
     
+    // Calculate accumulated TONIX since last collection
+    let lastCollectTime = profile.last_collect ? new Date(profile.last_collect) : new Date(profile.created_at)
+    
+    // If user has never collected, start from profile creation
+    if (!profile.last_collect) {
+      lastCollectTime = new Date(profile.created_at)
+    }
+    
     // Calculate time difference in hours
-    const timeDiffHours = (now.getTime() - lastCollect.getTime()) / (1000 * 60 * 60)
+    const timeDiffHours = (now.getTime() - lastCollectTime.getTime()) / (1000 * 60 * 60)
     
-    // Calculate accumulated TONIX (max 2x farming rate)
-    const maxAccumulation = farmingRate * 2
-    const calculatedAccumulation = Math.min(timeDiffHours * farmingRate, maxAccumulation)
+    // Calculate total accumulated TONIX (max 48 hours worth = 2x farming rate * 24)
+    const maxAccumulationHours = 48 // 2 days max accumulation
+    const cappedHours = Math.min(timeDiffHours, maxAccumulationHours)
+    const totalAccumulated = cappedHours * farmingRate
     
-    // Update ready_to_collect and last_collect in database
+    console.log(`Time since last collect: ${timeDiffHours.toFixed(2)} hours`)
+    console.log(`Capped accumulation hours: ${cappedHours.toFixed(2)}`)
+    console.log(`Total accumulated: ${totalAccumulated.toFixed(3)} TONIX`)
+    
+    // Update the ready_to_collect amount in database
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ 
-        ready_to_collect: calculatedAccumulation,
-        last_collect: now.toISOString(),
+        ready_to_collect: totalAccumulated,
         updated_at: now.toISOString()
       })
       .eq('telegram_id', userId)
@@ -74,14 +85,15 @@ Deno.serve(async (req) => {
       )
     }
 
-    console.log('Farming calculated successfully:', calculatedAccumulation)
+    console.log('Farming accumulation calculated successfully:', totalAccumulated)
 
     return new Response(
       JSON.stringify({ 
-        readyToCollect: calculatedAccumulation,
-        maxAccumulation,
+        readyToCollect: totalAccumulated,
+        maxAccumulation: maxAccumulationHours * farmingRate,
         farmingRate,
-        lastCollect: lastCollect.toISOString()
+        lastCollect: lastCollectTime.toISOString(),
+        timeSinceLastCollect: timeDiffHours
       }),
       { 
         status: 200, 
@@ -90,7 +102,7 @@ Deno.serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Calculate farming error:', error)
+    console.error('Farming accumulator error:', error)
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { 

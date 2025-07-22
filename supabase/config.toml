@@ -1,1 +1,74 @@
 project_id = "iqzvetrsqzluldryvrlk"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[auth]
+enabled = true
+port = 54320
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry = 3600
+enable_anonymous_sign_ins = false
+enable_signup = true
+enable_confirmations = false
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+
+[auth.sms]
+enable_signup = false
+enable_confirmations = false
+template = "Your code is {{ .Code }}"
+
+[db]
+port = 54322
+
+[db.pooler]
+enabled = false
+port = 54329
+pool_mode = "transaction"
+default_pool_size = 20
+max_client_conn = 100
+
+[edge_runtime]
+enabled = true
+port = 54323
+
+[functions.farming-accumulator]
+verify_jwt = false
+
+[functions.complete-task]
+verify_jwt = false
+
+[functions.daily-checkin]
+verify_jwt = false
+
+[functions.collect-tonix]
+verify_jwt = false
+
+[functions.get-user-stats]
+verify_jwt = false
+
+[functions.process-referral-commission]
+verify_jwt = false
+
+[functions.submit-referral]
+verify_jwt = false
+
+[storage]
+enabled = true
+port = 54324
+file_size_limit = "50MiB"
+
+[analytics]
+enabled = false
+port = 54327
+vector_port = 54328
+backend = "postgres"

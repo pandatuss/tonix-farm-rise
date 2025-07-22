@@ -7,6 +7,7 @@ import mascotHead from '@/assets/tonix-mascot-head.png';
 import { useTelegram } from '@/hooks/useTelegram';
 import { useUser } from '@/hooks/useUser';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 interface FarmingScreenProps {
   tonixBalance: number;
   farmingRate: number;
@@ -35,12 +36,30 @@ export default function FarmingScreen({
   
   // Force recompilation with comment
 
-  // Set accumulated TONIX from database (server handles offline calculation)
+  // Get accumulated TONIX from server on component mount and periodically
   useEffect(() => {
-    if (userProfile?.ready_to_collect !== undefined) {
-      setAccumulatedTonix(userProfile.ready_to_collect);
-    }
-  }, [userProfile?.ready_to_collect]);
+    const fetchAccumulation = async () => {
+      if (!telegramUser?.id) return;
+      
+      try {
+        const { data } = await supabase.functions.invoke('farming-accumulator', {
+          body: { userId: telegramUser.id.toString() }
+        });
+        
+        if (data?.readyToCollect !== undefined) {
+          setAccumulatedTonix(data.readyToCollect);
+        }
+      } catch (error) {
+        console.error('Failed to fetch farming accumulation:', error);
+      }
+    };
+
+    fetchAccumulation();
+    
+    // Refresh every 10 seconds to show live accumulation
+    const interval = setInterval(fetchAccumulation, 10000);
+    return () => clearInterval(interval);
+  }, [telegramUser?.id]);
 
   // Check if user has checked in today based on database
   const hasCheckedInToday = () => {
@@ -55,22 +74,13 @@ export default function FarmingScreen({
     setShowTimer(hasCheckedInToday());
   }, [userProfile?.last_check_in]);
 
-  // Continue real-time accumulation display from database value
+  // Update progress bar animation
   useEffect(() => {
-    if (userProfile?.ready_to_collect === undefined) return;
-    
     const interval = setInterval(() => {
-      const increment = farmingRate / 3600; // Per second rate
-      const maxCollectable = farmingRate * 2; // Maximum 2x farming rate
-      
-      setAccumulatedTonix(prev => {
-        const newAmount = Math.min(prev + increment, maxCollectable);
-        return newAmount;
-      });
       setProgress(prev => (prev + 1) % 100);
     }, 1000);
     return () => clearInterval(interval);
-  }, [farmingRate, userProfile?.ready_to_collect]);
+  }, []);
 
   // Timer to reset check-in status based on UTC+4
   useEffect(() => {
