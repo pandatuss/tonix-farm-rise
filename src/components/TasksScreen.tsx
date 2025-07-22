@@ -199,24 +199,19 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
         [taskType]: true
       }));
     } else if (specialTasksOpened[taskType] && !isCompleted) {
-      // Second click: claim reward and show checkmark
+      // Second click: claim reward and show success notification
       try {
         await completeTask('special', taskId, 5);
         onClaimSpecialTask(5);
         
-        const taskNames = {
-          followX: 'Follow on X',
-          joinChannel: 'Join Telegram Channel',
-          joinGroup: 'Join Telegram Group'
-        };
+        toast({
+          title: "Task Completed!",
+          description: "+5 TONIX earned successfully",
+          className: "mt-4"
+        });
         
       } catch (error: any) {
         console.log("Task completion failed:", error);
-        // If already completed, don't show error to user
-        if (error.message?.includes('already completed')) {
-          // Update UI to show task as completed
-          return;
-        }
       }
     }
   };
