@@ -118,9 +118,13 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
         onClaimDaily();
         setDailyClaimedToday(true);
         setShowDailyTimer(true);
-        
-      } catch (error) {
+      } catch (error: any) {
         console.log("Daily bonus claim failed:", error);
+        // If already claimed, update UI state to reflect this
+        if (error.message?.includes('already completed today')) {
+          setDailyClaimedToday(true);
+          setShowDailyTimer(true);
+        }
       }
     }
   };
@@ -132,9 +136,13 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
         onClaimWeekly();
         setWeeklyClaimedThisWeek(true);
         setShowWeeklyTimer(true);
-        
-      } catch (error) {
+      } catch (error: any) {
         console.log("Weekly bonus claim failed:", error);
+        // If already claimed, update UI state to reflect this
+        if (error.message?.includes('already completed this week')) {
+          setWeeklyClaimedThisWeek(true);
+          setShowWeeklyTimer(true);
+        }
       }
     }
   };
@@ -202,8 +210,13 @@ export default function TasksScreen({ onClaimDaily, onClaimWeekly, onCheckIn, on
           joinGroup: 'Join Telegram Group'
         };
         
-      } catch (error) {
+      } catch (error: any) {
         console.log("Task completion failed:", error);
+        // If already completed, don't show error to user
+        if (error.message?.includes('already completed')) {
+          // Update UI to show task as completed
+          return;
+        }
       }
     }
   };
