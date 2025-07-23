@@ -6,7 +6,9 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: ":2febf1376cbd.ngrok-free.app:",
+    allowedHost:
+  ['serval-generous-secondly.ngrok-free.app'],
+    host: "::",
     port: 8080,
   },
   plugins: [
