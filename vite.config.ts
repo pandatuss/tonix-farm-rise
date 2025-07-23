@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     allowedHost:
   ['serval-generous-secondly.ngrok-free.app'],
-    host: "::",
+    host: "serval-generous-secondly.ngrok-free.app",
     port: 8080,
   },
   plugins: [
